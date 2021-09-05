@@ -1,0 +1,2 @@
+export const MISSING_NICKNAME = 'MISSING_NICKNAME';
+export const NICKNAME_IN_USE = 'NICKNAME_IN_USE';

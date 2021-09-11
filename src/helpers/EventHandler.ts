@@ -1,22 +1,35 @@
 import { addUser, findUser, findAndRemoveUser, getUsers } from './Database';
+import { ChatSocket } from '../constants/type';
 import { Socket } from 'socket.io';
-import { ChatSocket } from '../types/type';
+
+export async function EventHandler(socket: ChatSocket) {
+  await broadcastConnection(socket);
+  await broadcastUsers(socket);
+  await broadcastChatJoin(socket);
+
+  socket.on('chat:message', (payload) => {
+    socket.broadcast.emit('chat:message', payload);
+  });
+
+  socket.on('disconnect', async () => {
+    await broadcastDisconnection(socket);
+    broadcastUsers(socket);
+  });
+}
 
 function logBroadcast(input: any) {
   console.log(input);
 }
 
-export async function broadcastConnection(socket: ChatSocket) {
+function broadcastConnection(socket: ChatSocket): Promise<void> | undefined {
   logBroadcast(`New connection created: ${socket.id}`);
 
   if (socket.nickname) {
-    console.log('should be here');
-    await addUser(socket.id, socket.nickname);
-    getUsers().then(console.log);
+    return addUser(socket.id, socket.nickname);
   }
 }
 
-export async function broadcastDisconnection(socket: Socket) {
+async function broadcastDisconnection(socket: Socket) {
   logBroadcast(`User ${socket.id} disconnected`);
 
   const user = await findAndRemoveUser(socket.id);
@@ -24,7 +37,7 @@ export async function broadcastDisconnection(socket: Socket) {
   socket.broadcast.emit('chat:leave', { ...user });
 }
 
-export async function broadcastChatJoin(socket: Socket) {
+async function broadcastChatJoin(socket: Socket) {
   console.log(`User join chat: ${socket.id}`);
 
   const user = await findUser(socket.id);
@@ -32,11 +45,9 @@ export async function broadcastChatJoin(socket: Socket) {
   socket.broadcast.emit('chat:join', { ...user });
 }
 
-export async function broadcastUsers(socket: Socket) {
+async function broadcastUsers(socket: Socket) {
   logBroadcast(`Broadcasting users`);
   const users = await getUsers();
-
-  console.log(users);
 
   socket.emit('users:update', users);
 

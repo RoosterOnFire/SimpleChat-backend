@@ -1,4 +1,4 @@
-import { User, Users } from '../types/type';
+import { User, Users } from '../constants/type';
 import { Database } from 'sqlite3';
 
 const DATABASE_FILE = `${__dirname}/database.db`;
@@ -39,16 +39,13 @@ export function runUsers(statement: string, args: any[] = []): Promise<void> {
 export function queryUsers(query: string, args: any[] = []): Promise<Users> {
   return new Promise((resolve, rejects) => {
     db.all(query, args, (err, row) => {
-      console.log('users', row);
       return err ? rejects(err) : resolve(row);
     });
   });
 }
 
-export async function addUser(id: string, nickname: string) {
-  console.log('before add user');
-  await runUsers('insert into users values (?, ?)', [id, nickname]);
-  console.log('after add user');
+export function addUser(id: string, nickname: string): Promise<void> {
+  return runUsers('insert into users values (?, ?)', [id, nickname]);
 }
 
 export async function findUser(id: string): Promise<User> {
@@ -66,12 +63,8 @@ export async function findAndRemoveUser(id: string): Promise<User> {
   return user;
 }
 
-export async function getUsers() {
-  const users = await queryUsers('select * from users');
-
-  console.log(users);
-
-  return users;
+export function getUsers(): Promise<Users> {
+  return queryUsers('select * from users');
 }
 
 export async function isExistingNickname(nickname: string) {
@@ -79,8 +72,6 @@ export async function isExistingNickname(nickname: string) {
     'select nickname from users where nickname = ?',
     [nickname]
   );
-
-  console.log('is existing', user.length > 0);
 
   return user.length > 0;
 }

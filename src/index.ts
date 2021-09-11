@@ -7,9 +7,9 @@ import {
   broadcastConnection,
   broadcastDisconnection,
   broadcastUsers,
-} from './events';
+} from './helpers/SocketEvents';
 import { ChatSocket } from '@/types/type';
-import { isExistingNickname } from './database';
+import { isExistingNickname } from './helpers/Database';
 import { MISSING_NICKNAME, NICKNAME_IN_USE } from './constants/errors';
 
 const app = express();
@@ -22,29 +22,31 @@ const io = new Server(httpServer, {
 
 app.use(cors({ origin: '*' }));
 
-io.on('connection', (socket: ChatSocket) => {
-  broadcastConnection(socket);
-  broadcastUsers(socket);
-  broadcastChatJoin(socket);
+io.on('connection', async (socket: ChatSocket) => {
+  await broadcastConnection(socket);
+  console.log(socket.nickname);
+  await broadcastUsers(socket);
+  await broadcastChatJoin(socket);
 
   socket.on('chat:message', (payload) => {
     socket.broadcast.emit('chat:message', payload);
   });
 
-  socket.on('disconnect', () => {
-    broadcastDisconnection(socket);
+  socket.on('disconnect', async () => {
+    console.log('should disconnect');
+    await broadcastDisconnection(socket);
     broadcastUsers(socket);
   });
 });
 
-io.use((socket: ChatSocket, next) => {
+io.use(async (socket: ChatSocket, next) => {
   const nickname = socket.handshake.auth.nickname;
-
   if (!nickname) {
     return next(new Error(MISSING_NICKNAME));
   }
 
-  if (isExistingNickname(nickname)) {
+  const isUsedNickname = await isExistingNickname(nickname);
+  if (isUsedNickname) {
     return next(new Error(NICKNAME_IN_USE));
   }
 

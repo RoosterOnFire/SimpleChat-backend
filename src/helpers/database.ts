@@ -18,9 +18,7 @@ function closeConnection() {
 }
 
 db.run(
-  `create table if not exists users (
-    id text,
-    nickname text)`,
+  `create table if not exists users (userId text, sessionId text, username text)`,
   (err) => {
     if (err) {
       console.error(`${err.message}`);
@@ -44,21 +42,38 @@ export function queryUsers(query: string, args: any[] = []): Promise<Users> {
   });
 }
 
-export function addUser(id: string, nickname: string): Promise<void> {
-  return runUsers('insert into users values (?, ?)', [id, nickname]);
+export async function addUser(
+  userId: string,
+  sessionId: string,
+  username: string
+): Promise<void> {
+  const user = await findUser(sessionId);
+  if (user) {
+    return;
+  }
+
+  return runUsers('insert into users values (?, ?, ?)', [
+    userId,
+    sessionId,
+    username,
+  ]);
 }
 
-export async function findUser(id: string): Promise<User> {
-  const query = await queryUsers('select * from users where id = ?', [id]);
+export async function findUser(sessionId: string): Promise<User> {
+  const query = await queryUsers('select * from users where sessionId = ?', [
+    sessionId,
+  ]);
 
   return query[0];
 }
 
 export async function findAndRemoveUser(id: string): Promise<User> {
-  const query = await queryUsers('select * from users where id = ?', [id]);
+  const query = await queryUsers('select * from users where sessionId = ?', [
+    id,
+  ]);
   const user = query[0];
 
-  await runUsers('delete from users where id = ?', [id]);
+  await runUsers('delete from users where sessionId = ?', [id]);
 
   return user;
 }
@@ -67,10 +82,10 @@ export function getUsers(): Promise<Users> {
   return queryUsers('select * from users');
 }
 
-export async function isExistingNickname(nickname: string) {
+export async function isUsedUsername(username: string) {
   const user = await queryUsers(
-    'select nickname from users where nickname = ?',
-    [nickname]
+    'select username from users where username = ?',
+    [username]
   );
 
   return user.length > 0;

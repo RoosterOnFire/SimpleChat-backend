@@ -1,7 +1,7 @@
 import { User, Users } from '../constants/type';
 import { Database } from 'sqlite3';
 
-const DATABASE_FILE = `${__dirname}/database.db`;
+const DATABASE_FILE = `${__dirname}/../../database.db`;
 
 const db = new Database(DATABASE_FILE, (err) => {
   return err

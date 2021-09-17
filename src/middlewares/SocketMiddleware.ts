@@ -9,6 +9,8 @@ export async function restoreSessionMiddleware(
 ) {
   const sessionId = socket.handshake.auth.sessionId;
   if (sessionId) {
+    console.log(`[INFO]: restoring session ${sessionId}`);
+
     const user = await findUser(sessionId);
     if (user) {
       socket.userId = user.userId;
@@ -17,6 +19,8 @@ export async function restoreSessionMiddleware(
 
       next();
     }
+
+    next();
   }
 
   next();
@@ -26,7 +30,12 @@ export async function userValidationMiddleware(
   socket: ChatSocket,
   next: SocketMiddlewareNext
 ) {
+  if (socket.sessionId) {
+    next();
+  }
+
   const username = socket.handshake.auth.nickname;
+
   if (!username) {
     return next(new Error(MISSING_NICKNAME));
   }

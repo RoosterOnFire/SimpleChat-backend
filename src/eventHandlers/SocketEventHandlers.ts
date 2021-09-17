@@ -1,10 +1,5 @@
-import {
-  addUser,
-  findUser,
-  findAndRemoveUser,
-  getUsers,
-} from '../helpers/Database';
-import { ChatSession, ChatSocket } from '../constants/type';
+import { addUser, findUser, getUsers } from '../helpers/Database';
+import { ChatSocket } from '../constants/type';
 import { Socket } from 'socket.io';
 
 export async function EventHandler(socket: ChatSocket) {
@@ -23,7 +18,7 @@ export async function EventHandler(socket: ChatSocket) {
 }
 
 function logBroadcast(input: any) {
-  console.log(input);
+  console.log(`[INFO] ${input}`);
 }
 
 async function broadcastConnection(socket: ChatSocket): Promise<void> {
@@ -41,7 +36,7 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
 }
 
 async function broadcastDisconnection(socket: ChatSocket) {
-  logBroadcast(`User ${socket.userId} disconnected`);
+  logBroadcast(`${socket.userId} disconnected`);
 
   if (socket.sessionId) {
     const user = await findUser(socket.sessionId);
@@ -60,7 +55,7 @@ async function broadcastUsers(socket: Socket) {
 }
 
 async function broadcastChatJoin(socket: ChatSocket) {
-  console.log(`User joined chat: ${socket.userId}`);
+  console.log(`[INFO] User joined chat: ${socket.userId}`);
 
   if (socket.sessionId) {
     const user = await findUser(socket.sessionId);

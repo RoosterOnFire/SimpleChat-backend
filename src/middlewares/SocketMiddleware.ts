@@ -1,7 +1,7 @@
 import { ChatSocket, SocketMiddlewareNext } from '../constants/type';
 import { isUsedUsername, findUser } from '../helpers/Database';
 import { MISSING_NICKNAME, NICKNAME_IN_USE } from '../constants/errors';
-import { createRndId } from '../helpers/helpers';
+import { createRndId, logInfo } from '../helpers/helpers';
 
 export async function restoreSessionMiddleware(
   socket: ChatSocket,
@@ -9,7 +9,7 @@ export async function restoreSessionMiddleware(
 ) {
   const sessionId = socket.handshake.auth.sessionId;
   if (sessionId) {
-    console.log(`[INFO]: restoring session ${sessionId}`);
+    logInfo(`restoring session ${sessionId}`);
 
     const user = await findUser(sessionId);
     if (user) {

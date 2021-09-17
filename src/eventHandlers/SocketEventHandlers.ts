@@ -1,28 +1,36 @@
-import { addUser, findUser, getUsers } from '../helpers/Database';
+import { addUser, deleteUser, findUser, getUsers } from '../helpers/Database';
 import { ChatSocket } from '../constants/type';
 import { Socket } from 'socket.io';
+import { logAdmin, logInfo } from '../helpers/helpers';
 
 export async function EventHandler(socket: ChatSocket) {
   await broadcastConnection(socket);
+
   await broadcastUsers(socket);
+
   await broadcastChatJoin(socket);
 
   socket.on('chat:message', (payload) => {
     socket.broadcast.emit('chat:message', payload);
   });
 
+  socket.on('user:kick', async (payload: { userId: string }) => {
+    logAdmin(`Kick user: ${payload.userId}`);
+
+    await deleteUser(payload.userId);
+
+    broadcastUsers(socket);
+  });
+
   socket.on('disconnect', async () => {
     await broadcastDisconnection(socket);
+
     broadcastUsers(socket);
   });
 }
 
-function logBroadcast(input: any) {
-  console.log(`[INFO] ${input}`);
-}
-
 async function broadcastConnection(socket: ChatSocket): Promise<void> {
-  logBroadcast(`New connection: ${socket.userId}`);
+  logInfo(`New connection: ${socket.userId}`);
 
   if (socket.userId && socket.sessionId && socket.username) {
     await addUser(socket.userId, socket.sessionId, socket.username);
@@ -36,7 +44,7 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
 }
 
 async function broadcastDisconnection(socket: ChatSocket) {
-  logBroadcast(`${socket.userId} disconnected`);
+  logInfo(`${socket.userId} disconnected`);
 
   if (socket.sessionId) {
     const user = await findUser(socket.sessionId);
@@ -46,7 +54,8 @@ async function broadcastDisconnection(socket: ChatSocket) {
 }
 
 async function broadcastUsers(socket: Socket) {
-  logBroadcast(`Broadcasting users`);
+  logInfo(`Broadcasting users`);
+
   const users = await getUsers();
 
   socket.emit('users:update', users);
@@ -55,7 +64,7 @@ async function broadcastUsers(socket: Socket) {
 }
 
 async function broadcastChatJoin(socket: ChatSocket) {
-  console.log(`[INFO] User joined chat: ${socket.userId}`);
+  logInfo(`User joined chat: ${socket.userId}`);
 
   if (socket.sessionId) {
     const user = await findUser(socket.sessionId);

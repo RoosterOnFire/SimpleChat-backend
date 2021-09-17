@@ -90,3 +90,9 @@ export async function isUsedUsername(username: string) {
 
   return user.length > 0;
 }
+
+export async function deleteUser(userId: string): Promise<{ message: string }> {
+  await runUsers('delete from users where userid = ?', [userId]);
+
+  return { message: `user deleted` };
+}

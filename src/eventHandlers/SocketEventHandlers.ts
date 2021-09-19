@@ -10,7 +10,7 @@ export async function EventHandler(socket: ChatSocket) {
 
   await broadcastChatJoin(socket);
 
-  socket.on('chat:message', (payload) => {
+  socket.on('chat:message', (payload: any) => {
     socket.broadcast.emit('chat:message', payload);
   });
 

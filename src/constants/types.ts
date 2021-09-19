@@ -1,3 +1,4 @@
+import { Model } from 'sequelize/types';
 import { Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 
@@ -18,3 +19,9 @@ export type User = {
 export type Users = User[];
 
 export type ChatSession = { userId: string; sessionId: string };
+
+export interface UserInstance extends Model {
+  userId: string;
+  sessionId: string;
+  username: string;
+}

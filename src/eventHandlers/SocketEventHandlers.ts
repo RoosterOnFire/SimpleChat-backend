@@ -1,5 +1,5 @@
-import { addUser, deleteUser, findUser, getUsers } from '../helpers/Database';
-import { ChatSocket } from '../constants/type';
+import { addUser, deleteUser, findUser, getUsers } from '../helpers/database';
+import { ChatSocket } from '../constants/types';
 import { Socket } from 'socket.io';
 import { logAdmin, logInfo } from '../helpers/helpers';
 
@@ -33,12 +33,16 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
   logInfo(`New connection: ${socket.userId}`);
 
   if (socket.userId && socket.sessionId && socket.username) {
-    await addUser(socket.userId, socket.sessionId, socket.username);
+    const newUser = await addUser(
+      socket.userId,
+      socket.sessionId,
+      socket.username
+    );
 
     socket.emit('session', {
-      userId: socket.userId,
-      sessionId: socket.sessionId,
-      username: socket.username,
+      userId: newUser.userId,
+      sessionId: newUser.sessionId,
+      username: newUser.username,
     });
   }
 }

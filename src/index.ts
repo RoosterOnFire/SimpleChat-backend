@@ -1,26 +1,23 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import cors from 'cors';
-import { EventHandler } from './eventHandlers/SocketEventHandlers';
+import fastify from 'fastify';
+import fastifyIO from 'fastify-socket.io';
 import {
   restoreSessionMiddleware,
   userValidationMiddleware,
 } from './middlewares/SocketMiddleware';
+import { EventHandler } from './eventHandlers/SocketEventHandlers';
 
-const app = express();
-app.use(cors({ origin: '*' }));
+const server = fastify();
 
-const httpServer = createServer(app);
-
-const io = new Server(httpServer, {
+server.register(fastifyIO, {
   cors: {
     methods: ['GET', 'POST'],
   },
 });
 
-io.use(restoreSessionMiddleware);
-io.use(userValidationMiddleware);
-io.on('connection', EventHandler);
+server.ready().then(() => {
+  server.io.use(restoreSessionMiddleware);
+  server.io.use(userValidationMiddleware);
+  server.io.on('connection', EventHandler);
+});
 
-httpServer.listen(4000);
+server.listen(4000);

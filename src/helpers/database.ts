@@ -1,98 +1,72 @@
-import { User, Users } from '../constants/type';
-import { Database } from 'sqlite3';
+import { DataTypes, Sequelize } from 'sequelize';
+import { DATABASE_FILE } from '../constants/const';
+import { User, UserInstance, Users } from '../constants/types';
+import { logDatabase } from './helpers';
 
-const DATABASE_FILE = `${__dirname}/../../database.db`;
-
-const db = new Database(DATABASE_FILE, (err) => {
-  return err
-    ? console.error(`Failed connecting:`, err.message)
-    : console.info('DB connected');
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: DATABASE_FILE,
+  logging: (msg) => logDatabase(msg),
 });
 
-function closeConnection() {
-  db.close((err) => {
-    return err
-      ? console.error(err.message)
-      : console.log('DB connection closed');
-  });
-}
+const UserModel = sequelize.define<UserInstance>('User', {
+  userId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  sessionId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  username: {
+    type: DataTypes.STRING,
+  },
+});
 
-db.run(
-  `create table if not exists users (userId text, sessionId text, username text)`,
-  (err) => {
-    if (err) {
-      console.error(`${err.message}`);
-    }
-  }
-);
-
-export function runUsers(statement: string, args: any[] = []): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    db.run(statement, args, (err) => {
-      return err ? reject(err) : resolve();
-    });
-  });
-}
-
-export function queryUsers(query: string, args: any[] = []): Promise<Users> {
-  return new Promise((resolve, rejects) => {
-    db.all(query, args, (err, row) => {
-      return err ? rejects(err) : resolve(row);
-    });
-  });
-}
+UserModel.sync();
 
 export async function addUser(
   userId: string,
   sessionId: string,
   username: string
-): Promise<void> {
-  const user = await findUser(sessionId);
+): Promise<User> {
+  const user = await UserModel.findOrCreate({
+    where: { userId },
+    defaults: { userId, sessionId, username },
+  });
+
+  return user[0];
+}
+
+export async function findUser(sessionId: string): Promise<User | null> {
+  return UserModel.findOne({ where: { sessionId } });
+}
+
+export async function findAndRemoveUser(id: string): Promise<User | null> {
+  const user = await UserModel.findOne({ where: { sessionId: id } });
+
   if (user) {
-    return;
+    await user.destroy();
   }
-
-  return runUsers('insert into users values (?, ?, ?)', [
-    userId,
-    sessionId,
-    username,
-  ]);
-}
-
-export async function findUser(sessionId: string): Promise<User> {
-  const query = await queryUsers('select * from users where sessionId = ?', [
-    sessionId,
-  ]);
-
-  return query[0];
-}
-
-export async function findAndRemoveUser(id: string): Promise<User> {
-  const query = await queryUsers('select * from users where sessionId = ?', [
-    id,
-  ]);
-  const user = query[0];
-
-  await runUsers('delete from users where sessionId = ?', [id]);
 
   return user;
 }
 
-export function getUsers(): Promise<Users> {
-  return queryUsers('select * from users');
+export async function getUsers(): Promise<Users> {
+  return UserModel.findAll();
 }
 
 export async function isUsedUsername(username: string) {
-  const user = await queryUsers(
-    'select username from users where username = ?',
-    [username]
-  );
+  const user = await UserModel.findAll({ where: { username } });
 
   return user.length > 0;
 }
 
 export async function deleteUser(userId: string): Promise<{ message: string }> {
-  await runUsers('delete from users where userid = ?', [userId]);
+  const user = await UserModel.findOne({ where: { userId } });
+
+  user?.destroy();
 
   return { message: `user deleted` };
 }

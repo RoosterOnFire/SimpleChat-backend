@@ -11,3 +11,7 @@ export function logInfo(message: string) {
 export function logAdmin(message: string) {
   console.log(`[ADMIN] ${message}`);
 }
+
+export function logDatabase(message: string) {
+  console.log(`[DB] ${message}`);
+}

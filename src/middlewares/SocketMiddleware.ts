@@ -1,5 +1,5 @@
-import { ChatSocket, SocketMiddlewareNext } from '../constants/type';
-import { isUsedUsername, findUser } from '../helpers/Database';
+import { ChatSocket, SocketMiddlewareNext } from '../constants/types';
+import { isUsedUsername, findUser } from '../helpers/database';
 import { MISSING_NICKNAME, NICKNAME_IN_USE } from '../constants/errors';
 import { createRndId, logInfo } from '../helpers/helpers';
 

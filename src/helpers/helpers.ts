@@ -1,17 +1,20 @@
+import chalk from 'chalk';
 import { randomBytes } from 'crypto';
+
+const log = console.log;
 
 export function createRndId() {
   return randomBytes(16).toString('hex');
 }
 
 export function logInfo(message: string) {
-  console.log(`[INFO] ${message}`);
+  log(`[${chalk.blue('INFO')}] ${message}`);
 }
 
 export function logAdmin(message: string) {
-  console.log(`[ADMIN] ${message}`);
+  log(`[${chalk.green('ADMIN')}] ${message}`);
 }
 
 export function logDatabase(message: string) {
-  console.log(`[DB] ${message}`);
+  log(`[${chalk.yellow('DB')}] ${message}`);
 }

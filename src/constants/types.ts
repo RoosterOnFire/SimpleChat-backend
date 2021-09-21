@@ -22,6 +22,7 @@ export type ChatSession = { userId: string; sessionId: string };
 
 export interface UserInstance extends Model {
   userId: string;
+  socketId: string;
   sessionId: string;
   username: string;
 }

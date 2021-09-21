@@ -17,7 +17,15 @@ export async function EventHandler(socket: ChatSocket) {
   socket.on('user:kick', async (payload: { userId: string }) => {
     logAdmin(`Kick user: ${payload.userId}`);
 
-    await deleteUser(payload.userId);
+    const socketId = await deleteUser(payload.userId);
+
+    if (socketId) {
+      if (socket.id === socketId) {
+        socket.emit('session:close');
+      } else {
+        socket.to(socketId).emit('session:close');
+      }
+    }
 
     broadcastUsers(socket);
   });
@@ -35,6 +43,7 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
   if (socket.userId && socket.sessionId && socket.username) {
     const newUser = await addUser(
       socket.userId,
+      socket.id,
       socket.sessionId,
       socket.username
     );

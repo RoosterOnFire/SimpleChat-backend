@@ -1,6 +1,9 @@
 import { ChatSocket, SocketMiddlewareNext } from '../constants/types';
 import { isUsedUsername, findUser } from '../helpers/database';
-import { MISSING_NICKNAME, NICKNAME_IN_USE } from '../constants/errors';
+import {
+  ERROR_MISSING_NICKNAME,
+  ERROR_NICKNAME_IN_USE,
+} from '../constants/errors';
 import { createRndId, logInfo } from '../helpers/helpers';
 
 export async function restoreSessionMiddleware(
@@ -9,7 +12,7 @@ export async function restoreSessionMiddleware(
 ) {
   const sessionId = socket.handshake.auth.sessionId;
   if (sessionId) {
-    logInfo(`restoring session ${sessionId}`);
+    logInfo(`Trying to restoring session for ${sessionId}`);
 
     const user = await findUser(sessionId);
     if (user) {
@@ -17,7 +20,11 @@ export async function restoreSessionMiddleware(
       socket.sessionId = user.sessionId;
       socket.username = user.username;
 
+      logInfo(`Restoring session for ${sessionId}`);
+
       next();
+    } else {
+      logInfo(`Session id ${sessionId} not found`);
     }
 
     next();
@@ -37,12 +44,12 @@ export async function userValidationMiddleware(
   const username = socket.handshake.auth.nickname;
 
   if (!username) {
-    return next(new Error(MISSING_NICKNAME));
+    return next(new Error(ERROR_MISSING_NICKNAME));
   }
 
   const isUsed = await isUsedUsername(username);
   if (isUsed) {
-    return next(new Error(NICKNAME_IN_USE));
+    return next(new Error(ERROR_NICKNAME_IN_USE));
   }
 
   socket.sessionId = createRndId();

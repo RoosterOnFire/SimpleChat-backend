@@ -9,6 +9,10 @@ const sequelize = new Sequelize({
 });
 
 const UserModel = sequelize.define<UserInstance>('User', {
+  socketId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   userId: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -27,12 +31,13 @@ UserModel.sync();
 
 export async function addUser(
   userId: string,
+  socketId: string,
   sessionId: string,
   username: string
 ): Promise<User> {
   const user = await UserModel.findOrCreate({
     where: { userId },
-    defaults: { userId, sessionId, username },
+    defaults: { userId, socketId, sessionId, username },
   });
 
   return user[0];
@@ -62,10 +67,11 @@ export async function isUsedUsername(username: string) {
   return user.length > 0;
 }
 
-export async function deleteUser(userId: string): Promise<{ message: string }> {
+export async function deleteUser(userId: string): Promise<string | undefined> {
   const user = await UserModel.findOne({ where: { userId } });
 
+  const socketId = user?.socketId;
   user?.destroy();
 
-  return { message: `user deleted` };
+  return socketId;
 }

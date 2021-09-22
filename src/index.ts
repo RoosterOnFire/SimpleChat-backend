@@ -1,9 +1,7 @@
 import fastify from 'fastify';
 import fastifyIO from 'fastify-socket.io';
-import {
-  restoreSessionMiddleware,
-  userValidationMiddleware,
-} from './middlewares/SocketMiddleware';
+import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
+import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
 import { EventHandler } from './eventHandlers/SocketEventHandlers';
 
 const server = fastify();
@@ -15,8 +13,8 @@ server.register(fastifyIO, {
 });
 
 server.ready().then(() => {
-  server.io.use(restoreSessionMiddleware);
-  server.io.use(userValidationMiddleware);
+  server.io.use(RestoreSessionMiddleware);
+  server.io.use(UserValidationMiddleware);
   server.io.on('connection', EventHandler);
 });
 

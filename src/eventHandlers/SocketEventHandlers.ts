@@ -1,14 +1,12 @@
 import { addUser, deleteUser, findUser, getUsers } from '../helpers/database';
 import { ChatSocket } from '../constants/types';
 import { Socket } from 'socket.io';
-import { logAdmin, logInfo } from '../helpers/helpers';
+import { logAdmin, logInfo } from '../helpers/loggers';
 
 export async function EventHandler(socket: ChatSocket) {
   await broadcastConnection(socket);
 
-  await broadcastUsers(socket);
-
-  await broadcastChatJoin(socket);
+  Promise.all([broadcastUsers(socket), broadcastChatJoin(socket)]);
 
   socket.on('chat:message', (payload: any) => {
     socket.broadcast.emit('chat:message', payload);
@@ -30,6 +28,16 @@ export async function EventHandler(socket: ChatSocket) {
     broadcastUsers(socket);
   });
 
+  socket.on('user:logoff', async () => {
+    logAdmin(`Closing session: ${socket.userId}`);
+
+    if (socket.userId) {
+      await deleteUser(socket.userId);
+
+      socket.emit('session:closed');
+    }
+  });
+
   socket.on('disconnect', async () => {
     await broadcastDisconnection(socket);
 
@@ -48,7 +56,7 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
       socket.username
     );
 
-    socket.emit('session', {
+    socket.emit('session:created', {
       userId: newUser.userId,
       sessionId: newUser.sessionId,
       username: newUser.username,

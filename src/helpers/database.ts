@@ -1,11 +1,10 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { User, UserInstance, Users } from '../constants/types';
-import { logDatabase } from './helpers';
+import { logDatabase } from './loggers';
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: `${__dirname}/../../database.sqlite`,
-  logging: (msg) => logDatabase(msg),
+  logging: logDatabase,
 });
 
 const UserModel = sequelize.define<UserInstance>('User', {
@@ -71,6 +70,7 @@ export async function deleteUser(userId: string): Promise<string | undefined> {
   const user = await UserModel.findOne({ where: { userId } });
 
   const socketId = user?.socketId;
+
   user?.destroy();
 
   return socketId;

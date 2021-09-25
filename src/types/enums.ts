@@ -1,0 +1,9 @@
+export enum Roles {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
+
+export enum Errors {
+  ERROR_MISSING_NICKNAME = 'ERROR_MISSING_NICKNAME',
+  ERROR_NICKNAME_IN_USE = 'ERROR_NICKNAME_IN_USE',
+}

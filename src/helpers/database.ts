@@ -1,5 +1,6 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { User, UserInstance, Users } from '../constants/types';
+import { User, UserInstance, Users } from '../types/types';
+import { Roles } from '../types/enums';
 import { logDatabase } from './loggers';
 
 const sequelize = new Sequelize({
@@ -24,6 +25,9 @@ const UserModel = sequelize.define<UserInstance>('User', {
   username: {
     type: DataTypes.STRING,
   },
+  role: {
+    type: DataTypes.STRING,
+  },
 });
 
 UserModel.sync();
@@ -36,10 +40,27 @@ export async function addUser(
 ): Promise<User> {
   const user = await UserModel.findOrCreate({
     where: { userId },
-    defaults: { userId, socketId, sessionId, username },
+    defaults: { userId, socketId, sessionId, username, role: Roles.USER },
   });
 
   return user[0];
+}
+
+export async function addAdmin(
+  userId: string,
+  socketId: string,
+  sessionId: string,
+  username: string = 'Admin'
+) {
+  const user = await UserModel.create({
+    userId,
+    socketId,
+    sessionId,
+    username,
+    role: Roles.ADMIN,
+  });
+
+  return user;
 }
 
 export async function findUser(sessionId: string): Promise<User | null> {

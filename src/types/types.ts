@@ -14,15 +14,20 @@ export type User = {
   userId: string;
   sessionId: string;
   username: string;
+  role: string;
 };
 
 export type Users = User[];
 
-export type ChatSession = { userId: string; sessionId: string };
+export type ChatSession = {
+  userId: string;
+  sessionId: string;
+};
 
 export interface UserInstance extends Model {
   userId: string;
   socketId: string;
   sessionId: string;
   username: string;
+  role: string;
 }

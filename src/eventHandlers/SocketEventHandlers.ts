@@ -1,5 +1,5 @@
 import { addUser, deleteUser, findUser, getUsers } from '../helpers/database';
-import { ChatSocket } from '../constants/types';
+import { ChatSocket } from '../types/types';
 import { Socket } from 'socket.io';
 import { logAdmin, logInfo } from '../helpers/loggers';
 
@@ -60,6 +60,7 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
       userId: newUser.userId,
       sessionId: newUser.sessionId,
       username: newUser.username,
+      role: newUser.role,
     });
   }
 }

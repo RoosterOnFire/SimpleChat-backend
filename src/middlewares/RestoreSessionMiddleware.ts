@@ -1,4 +1,4 @@
-import { ChatSocket, SocketMiddlewareNext } from '../constants/types';
+import { ChatSocket, SocketMiddlewareNext } from '../types/types';
 import { findUser } from '../helpers/database';
 import { logInfo } from '../helpers/loggers';
 
@@ -18,13 +18,13 @@ export async function RestoreSessionMiddleware(
 
       logInfo(`Restoring session for ${sessionId}`);
 
-      next();
+      return next();
     } else {
       logInfo(`Session id ${sessionId} not found`);
     }
 
-    next();
+    return next();
   }
 
-  next();
+  return next();
 }

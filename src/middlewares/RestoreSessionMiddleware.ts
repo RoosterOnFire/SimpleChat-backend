@@ -7,24 +7,23 @@ export async function RestoreSessionMiddleware(
   next: SocketMiddlewareNext
 ) {
   const sessionId = socket.handshake.auth.sessionId;
-  if (sessionId) {
-    logInfo(`Trying to restoring session for ${sessionId}`);
 
-    const user = await findUser(sessionId);
-    if (user) {
-      socket.userId = user.userId;
-      socket.sessionId = user.sessionId;
-      socket.username = user.username;
+  if (!sessionId) {
+    return next();
+  }
 
-      logInfo(`Restoring session for ${sessionId}`);
+  const user = await findUser(sessionId);
+  if (user) {
+    logInfo(`Restoring session`);
 
-      return next();
-    } else {
-      logInfo(`Session id ${sessionId} not found`);
-    }
+    socket.userId = user.userId;
+    socket.sessionId = user.sessionId;
+    socket.username = user.username;
 
     return next();
   }
+
+  logInfo(`Session not restored`);
 
   return next();
 }

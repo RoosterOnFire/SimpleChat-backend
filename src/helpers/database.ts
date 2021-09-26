@@ -32,35 +32,44 @@ const UserModel = sequelize.define<UserInstance>('User', {
 
 UserModel.sync();
 
-export async function addUser(
-  userId: string,
-  socketId: string,
-  sessionId: string,
-  username: string
-): Promise<User> {
-  const user = await UserModel.findOrCreate({
-    where: { userId },
-    defaults: { userId, socketId, sessionId, username, role: Roles.USER },
+export async function addUser({
+  session,
+  socket,
+  user,
+  username,
+}: {
+  session: string;
+  socket: string;
+  user: string;
+  username: string;
+}): Promise<User> {
+  const User = await UserModel.findOrCreate({
+    where: { userId: user },
+    defaults: {
+      userId: user,
+      socketId: socket,
+      sessionId: session,
+      username: username,
+      role: Roles.USER,
+    },
   });
 
-  return user[0];
+  return User[0];
 }
 
 export async function addAdmin(
   userId: string,
   socketId: string,
   sessionId: string,
-  username: string = 'Admin'
+  username: string = Roles.ADMIN
 ) {
-  const user = await UserModel.create({
+  return await UserModel.create({
     userId,
     socketId,
     sessionId,
     username,
     role: Roles.ADMIN,
   });
-
-  return user;
 }
 
 export async function findUser(sessionId: string): Promise<User | null> {
@@ -81,18 +90,18 @@ export async function getUsers(): Promise<Users> {
   return UserModel.findAll();
 }
 
-export async function isUsedUsername(username: string) {
-  const user = await UserModel.findAll({ where: { username } });
-
-  return user.length > 0;
+export async function isAvailableUsername(username: string) {
+  return await UserModel.findAndCountAll({ where: { username } }).then(
+    (users) => users.count > 0
+  );
 }
 
 export async function deleteUser(userId: string): Promise<string | undefined> {
   const user = await UserModel.findOne({ where: { userId } });
 
-  const socketId = user?.socketId;
+  const socket = user?.socketId;
 
   user?.destroy();
 
-  return socketId;
+  return socket;
 }

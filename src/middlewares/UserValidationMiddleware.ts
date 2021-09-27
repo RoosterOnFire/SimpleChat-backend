@@ -1,44 +1,30 @@
 import { ChatSocket, SocketMiddlewareNext } from '../types/types';
-import { addAdmin, isAvailableUsername } from '../helpers/database';
-import { createRndId } from '../helpers/helpers';
-import { logInfo } from '../helpers/loggers';
-import { Errors, Roles } from '../types/enums';
+import { Errors } from '../types/enums';
+import { findUserWithNameAndPass } from '../helpers/database';
 
 export async function UserValidationMiddleware(
   socket: ChatSocket,
   next: SocketMiddlewareNext
 ) {
-  if (socket.sessionId) {
+  if (socket.user?.session_id) {
     return next();
   }
 
-  const adminAccessKey = socket.handshake.auth.adminAccessKey;
-  if (adminAccessKey === Roles.ADMIN) {
-    logInfo(`admin access key: ${adminAccessKey}`);
-
-    const sessionId = createRndId();
-    const userId = createRndId();
-    const username = 'Admin';
-
-    socket.sessionId = sessionId;
-    socket.userId = userId;
-    socket.username = username;
-
-    await addAdmin(userId, socket.id, sessionId, username);
-
-    return next();
+  if (!socket.handshake.auth.username) {
+    return next(new Error(Errors.ERROR_MISSING_USERNAME));
   }
 
-  if (!socket.handshake.auth.nickname) {
-    return next(new Error(Errors.ERROR_MISSING_NICKNAME));
+  if (!socket.handshake.auth.password) {
+    return next(new Error(Errors.ERROR_MISSING_PASSWORD));
   }
 
-  const isUsed = await isAvailableUsername(socket.handshake.auth.nickname);
-  if (isUsed) {
-    return next(new Error(Errors.ERROR_NICKNAME_IN_USE));
+  const isUser = await findUserWithNameAndPass(
+    socket.handshake.auth.username,
+    socket.handshake.auth.password
+  );
+  if (isUser === null) {
+    return next(new Error(Errors.ERROR_INVALID_SING_IN));
   }
-
-  socket.username = socket.handshake.auth.nickname;
 
   return next();
 }

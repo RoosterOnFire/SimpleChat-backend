@@ -1,7 +1,8 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { User, UserInstance, Users } from '../types/types';
+import { UserInstance, UserInstances } from '../types/types';
 import { Roles } from '../types/enums';
 import { logDatabase } from './loggers';
+import { createRndId } from './helpers';
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
@@ -9,20 +10,22 @@ const sequelize = new Sequelize({
 });
 
 const UserModel = sequelize.define<UserInstance>('User', {
-  socketId: {
+  socket_id: {
     type: DataTypes.STRING,
-    allowNull: false,
   },
-  userId: {
+  user_id: {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
   },
-  sessionId: {
+  session_id: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   username: {
+    type: DataTypes.STRING,
+  },
+  password: {
     type: DataTypes.STRING,
   },
   role: {
@@ -37,20 +40,25 @@ export async function addUser({
   socket,
   user,
   username,
+  password,
+  role = Roles.USER,
 }: {
   session: string;
   socket: string;
   user: string;
   username: string;
-}): Promise<User> {
+  password: string;
+  role?: Roles;
+}): Promise<UserInstance> {
   const User = await UserModel.findOrCreate({
-    where: { userId: user },
+    where: { user_id: user },
     defaults: {
-      userId: user,
-      socketId: socket,
-      sessionId: session,
-      username: username,
-      role: Roles.USER,
+      user_id: user,
+      socket_id: socket,
+      session_id: session,
+      username,
+      password,
+      role,
     },
   });
 
@@ -64,19 +72,38 @@ export async function addAdmin(
   username: string = Roles.ADMIN
 ) {
   return await UserModel.create({
-    userId,
-    socketId,
-    sessionId,
+    user_id: userId,
+    socket_id: socketId,
+    session_id: sessionId,
     username,
     role: Roles.ADMIN,
   });
 }
 
-export async function findUser(sessionId: string): Promise<User | null> {
-  return UserModel.findOne({ where: { sessionId } });
+export async function findUser(
+  sessionId: string
+): Promise<UserInstance | null> {
+  return UserModel.findOne({ where: { session_id: sessionId } });
 }
 
-export async function findAndRemoveUser(id: string): Promise<User | null> {
+export async function findUserWithNameAndPass(
+  username: string,
+  password: string
+) {
+  return UserModel.findOrCreate({
+    where: { username, password },
+    defaults: {
+      username,
+      password,
+      user_id: createRndId(),
+      session_id: createRndId(),
+    },
+  });
+}
+
+export async function findAndRemoveUser(
+  id: string
+): Promise<UserInstance | null> {
   const user = await UserModel.findOne({ where: { sessionId: id } });
 
   if (user) {
@@ -86,7 +113,7 @@ export async function findAndRemoveUser(id: string): Promise<User | null> {
   return user;
 }
 
-export async function getUsers(): Promise<Users> {
+export async function getUsers(): Promise<UserInstances> {
   return UserModel.findAll();
 }
 
@@ -97,11 +124,11 @@ export async function isAvailableUsername(username: string) {
 }
 
 export async function deleteUser(userId: string): Promise<string | undefined> {
-  const user = await UserModel.findOne({ where: { userId } });
+  const User = await UserModel.findOne({ where: { user_id: userId } });
 
-  const socket = user?.socketId;
+  const socket = User?.socket_id;
 
-  user?.destroy();
+  User?.destroy();
 
   return socket;
 }

@@ -6,19 +6,19 @@ export async function RestoreSessionMiddleware(
   socket: ChatSocket,
   next: SocketMiddlewareNext
 ) {
+  logInfo('Trying to restore session');
+
   const sessionId = socket.handshake.auth.sessionId;
 
   if (!sessionId) {
     return next();
   }
 
-  const user = await findUser(sessionId);
-  if (user) {
+  const User = await findUser(sessionId);
+  if (User) {
     logInfo(`Restoring session`);
 
-    socket.userId = user.userId;
-    socket.sessionId = user.sessionId;
-    socket.username = user.username;
+    socket.user = User;
 
     return next();
   }

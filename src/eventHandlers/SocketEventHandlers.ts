@@ -5,9 +5,11 @@ import { logAdmin, logInfo } from '../helpers/loggers';
 import { createRndId } from '../helpers/helpers';
 
 export async function EventHandler(socket: ChatSocket) {
-  await broadcastConnection(socket);
+  if (!socket.user) {
+    await broadcastConnection(socket);
 
-  Promise.all([broadcastUsers(socket), broadcastChatJoin(socket)]);
+    Promise.all([broadcastUsers(socket), broadcastChatJoin(socket)]);
+  }
 
   socket.on('chat:message', (payload: any) => {
     socket.broadcast.emit('chat:message', payload);
@@ -29,10 +31,10 @@ export async function EventHandler(socket: ChatSocket) {
   });
 
   socket.on('user:logoff', async () => {
-    logAdmin(`Closing session: ${socket.userId}`);
+    logAdmin(`Closing session: ${socket.user?.user_id}`);
 
-    if (socket.userId) {
-      await deleteUser(socket.userId);
+    if (socket.user?.user_id) {
+      await deleteUser(socket.user?.user_id);
       socket.emit('session:closed');
     }
   });
@@ -47,42 +49,42 @@ async function broadcastConnection(socket: ChatSocket): Promise<void> {
   logInfo(`New connection: ${socket.id}`);
 
   const newUser = await addUser({
-    session: socket.sessionId || createRndId(),
+    session: createRndId(),
     socket: socket.id,
-    user: socket.userId || createRndId(),
+    user: createRndId(),
     username: socket.handshake.auth.username,
+    password: socket.handshake.auth.password,
   });
 
   socket.emit('session:created', {
-    userId: newUser.userId,
-    sessionId: newUser.sessionId,
-    username: newUser.username,
+    userId: newUser.user_id,
+    sessionId: newUser.session_id,
     role: newUser.role,
   });
 }
 
 async function broadcastDisconnection(socket: ChatSocket) {
-  if (socket.userId && socket.sessionId) {
-    logInfo(`${socket.userId} disconnected`);
+  if (socket.user?.user_id && socket.user?.session_id) {
+    logInfo(`${socket.user.user_id} disconnected`);
 
-    const user = await findUser(socket.sessionId);
-    socket.broadcast.emit('chat:leave', { ...user });
+    const User = await findUser(socket.user.session_id);
+    socket.broadcast.emit('chat:leave', { ...User });
   }
 }
 
 async function broadcastUsers(socket: Socket) {
   logInfo(`Broadcasting users`);
 
-  const users = await getUsers();
-  socket.emit('users:update', users);
-  socket.broadcast.emit('users:update', users);
+  const User = await getUsers();
+  socket.emit('users:update', User);
+  socket.broadcast.emit('users:update', User);
 }
 
 async function broadcastChatJoin(socket: ChatSocket) {
-  logInfo(`User joined chat: ${socket.userId}`);
+  logInfo(`User joined chat: ${socket.user?.user_id}`);
 
-  if (socket.sessionId) {
-    const user = await findUser(socket.sessionId);
+  if (socket.user?.session_id) {
+    const user = await findUser(socket.user?.session_id);
     socket.broadcast.emit('chat:join', { ...user });
   }
 }

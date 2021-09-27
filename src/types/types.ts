@@ -3,9 +3,7 @@ import { Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 
 export type ChatSocket = Socket & {
-  userId?: string;
-  sessionId?: string;
-  username?: string;
+  user?: UserInstance;
 };
 
 export type SocketMiddlewareNext = (err?: ExtendedError) => void;
@@ -25,9 +23,12 @@ export type ChatSession = {
 };
 
 export interface UserInstance extends Model {
-  userId: string;
-  socketId: string;
-  sessionId: string;
-  username: string;
+  password: string;
   role: string;
+  session_id: string;
+  socket_id: string;
+  user_id: string;
+  username: string;
 }
+
+export type UserInstances = UserInstance[];

@@ -6,24 +6,23 @@ export async function UserValidationMiddleware(
   socket: ChatSocket,
   next: SocketMiddlewareNext
 ) {
-  if (socket.user?.session_id) {
+  if (socket.user) {
     return next();
   }
 
-  if (!socket.handshake.auth.username) {
-    return next(new Error(Errors.ERROR_MISSING_USERNAME));
-  }
+  const auth = socket.handshake.auth;
 
-  if (!socket.handshake.auth.password) {
+  if (!auth.username) {
+    return next(new Error(Errors.ERROR_MISSING_USERNAME));
+  } else if (!auth.password) {
     return next(new Error(Errors.ERROR_MISSING_PASSWORD));
   }
 
-  const isUser = await findUserWithNameAndPass(
-    socket.handshake.auth.username,
-    socket.handshake.auth.password
-  );
-  if (isUser === null) {
+  const User = await findUserWithNameAndPass(auth.username, auth.password);
+  if (User === null) {
     return next(new Error(Errors.ERROR_INVALID_SING_IN));
+  } else {
+    socket.user = User;
   }
 
   return next();

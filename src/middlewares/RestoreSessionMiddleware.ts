@@ -6,7 +6,7 @@ export async function RestoreSessionMiddleware(
   socket: ChatSocket,
   next: SocketMiddlewareNext
 ) {
-  logInfo('Trying to restore session');
+  logInfo('Checking for existing session');
 
   const sessionId = socket.handshake.auth.sessionId;
 
@@ -15,15 +15,14 @@ export async function RestoreSessionMiddleware(
   }
 
   const User = await findUser(sessionId);
-  if (User) {
-    logInfo(`Restoring session`);
 
-    socket.user = User;
+  socket.user = User ?? undefined;
 
-    return next();
+  if (socket.user) {
+    logInfo('Existing session found');
+  } else {
+    logInfo('No session found');
   }
-
-  logInfo(`Session not restored`);
 
   return next();
 }

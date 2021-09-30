@@ -33,9 +33,26 @@ const UserModel = sequelize.define<UserInstance>('User', {
   },
 });
 
-UserModel.sync();
+UserModel.sync().then(() => {
+  /** HARD CODED TEST USERS */
+  UserModel.create({
+    user_id: createRndId(),
+    session_id: createRndId(),
+    username: 'admin',
+    password: 'admin',
+    role: Roles.ADMIN,
+  });
 
-export async function addUser({
+  UserModel.create({
+    user_id: createRndId(),
+    session_id: createRndId(),
+    username: 'user',
+    password: 'user',
+    role: Roles.USER,
+  });
+});
+
+export async function createUser({
   session,
   socket,
   user,
@@ -65,7 +82,7 @@ export async function addUser({
   return User[0];
 }
 
-export async function addAdmin(
+export async function createAdmin(
   userId: string,
   socketId: string,
   sessionId: string,
@@ -80,6 +97,10 @@ export async function addAdmin(
   });
 }
 
+export async function updateSocket(user: string, socket: string) {
+  await UserModel.update({ socket }, { where: { user_id: user } });
+}
+
 export async function findUser(
   sessionId: string
 ): Promise<UserInstance | null> {
@@ -90,14 +111,8 @@ export async function findUserWithNameAndPass(
   username: string,
   password: string
 ) {
-  return UserModel.findOrCreate({
+  return UserModel.findOne({
     where: { username, password },
-    defaults: {
-      username,
-      password,
-      user_id: createRndId(),
-      session_id: createRndId(),
-    },
   });
 }
 

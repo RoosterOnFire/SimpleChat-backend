@@ -3,7 +3,7 @@ import fastifyHelmet from 'fastify-helmet';
 import fastifyIO from 'fastify-socket.io';
 import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
 import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
-import { EventHandler } from './eventHandlers/SocketEventHandlers';
+import { SocketEventHandlers } from './eventHandlers/SocketEventHandlers';
 
 const server = fastify();
 
@@ -18,7 +18,7 @@ server.register(fastifyIO, {
 server.ready().then(() => {
   server.io.use(RestoreSessionMiddleware);
   server.io.use(UserValidationMiddleware);
-  server.io.on('connection', EventHandler);
+  server.io.on('connection', SocketEventHandlers);
 });
 
 server.listen(4000);

@@ -1,15 +1,32 @@
-import { addUser, deleteUser, findUser, getUsers } from '../helpers/database';
-import { ChatSocket } from '../types/types';
+import {
+  deleteUser,
+  findUser,
+  getUsers,
+  updateSocket,
+} from '../helpers/database';
+import { ChatSocket, UserInstance } from '../types/types';
 import { Socket } from 'socket.io';
 import { logAdmin, logInfo } from '../helpers/loggers';
-import { createRndId } from '../helpers/helpers';
 
-export async function EventHandler(socket: ChatSocket) {
-  if (!socket.user) {
-    await broadcastConnection(socket);
-
-    Promise.all([broadcastUsers(socket), broadcastChatJoin(socket)]);
+export async function SocketEventHandlers(socket: ChatSocket) {
+  if (socket.user) {
+    return handleExistingUser(socket.user, socket);
+  } else {
+    logAdmin('work in progress');
   }
+}
+
+async function handleExistingUser(User: UserInstance, socket: ChatSocket) {
+  await updateSocket(User.user_id, socket.id);
+
+  socket.emit('connect:valid', {
+    role: User.role,
+    sessionId: User.session_id,
+    userId: User.user_id,
+    username: User.username,
+  });
+
+  Promise.all([broadcastUsers(socket), broadcastChatJoin(socket)]);
 
   socket.on('chat:message', (payload: any) => {
     socket.broadcast.emit('chat:message', payload);
@@ -42,24 +59,6 @@ export async function EventHandler(socket: ChatSocket) {
   socket.on('disconnect', async () => {
     await broadcastDisconnection(socket);
     broadcastUsers(socket);
-  });
-}
-
-async function broadcastConnection(socket: ChatSocket): Promise<void> {
-  logInfo(`New connection: ${socket.id}`);
-
-  const newUser = await addUser({
-    session: createRndId(),
-    socket: socket.id,
-    user: createRndId(),
-    username: socket.handshake.auth.username,
-    password: socket.handshake.auth.password,
-  });
-
-  socket.emit('session:created', {
-    userId: newUser.user_id,
-    sessionId: newUser.session_id,
-    role: newUser.role,
   });
 }
 

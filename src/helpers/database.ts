@@ -52,7 +52,7 @@ UserModel.sync().then(() => {
   });
 });
 
-export async function createUser({
+async function createUser({
   session,
   socket,
   user,
@@ -82,7 +82,7 @@ export async function createUser({
   return User[0];
 }
 
-export async function createAdmin(
+async function createAdmin(
   userId: string,
   socketId: string,
   sessionId: string,
@@ -97,28 +97,28 @@ export async function createAdmin(
   });
 }
 
-export async function updateSocket(user: string, socket: string) {
+async function updateUserLogoff(user_id: string) {
+  return await UserModel.update(
+    { socket_id: '', session_id: '' },
+    { where: { user_id } }
+  );
+}
+
+async function updateUserSocket(user: string, socket: string) {
   await UserModel.update({ socket }, { where: { user_id: user } });
 }
 
-export async function findUser(
-  sessionId: string
-): Promise<UserInstance | null> {
+async function findUser(sessionId: string): Promise<UserInstance | null> {
   return UserModel.findOne({ where: { session_id: sessionId } });
 }
 
-export async function findUserWithNameAndPass(
-  username: string,
-  password: string
-) {
+async function findWithNameAndPass(username: string, password: string) {
   return UserModel.findOne({
     where: { username, password },
   });
 }
 
-export async function findAndRemoveUser(
-  id: string
-): Promise<UserInstance | null> {
+async function findAndRemoveUser(id: string): Promise<UserInstance | null> {
   const user = await UserModel.findOne({ where: { sessionId: id } });
 
   if (user) {
@@ -128,17 +128,17 @@ export async function findAndRemoveUser(
   return user;
 }
 
-export async function getUsers(): Promise<UserInstances> {
+async function getUsers(): Promise<UserInstances> {
   return UserModel.findAll();
 }
 
-export async function isAvailableUsername(username: string) {
+async function isAvailableUsername(username: string) {
   return await UserModel.findAndCountAll({ where: { username } }).then(
     (users) => users.count > 0
   );
 }
 
-export async function deleteUser(userId: string): Promise<string | undefined> {
+async function deleteUser(userId: string): Promise<string | undefined> {
   const User = await UserModel.findOne({ where: { user_id: userId } });
 
   const socket = User?.socket_id;
@@ -147,3 +147,16 @@ export async function deleteUser(userId: string): Promise<string | undefined> {
 
   return socket;
 }
+
+export const UserRespository = {
+  createAdmin,
+  createUser,
+  deleteUser,
+  findAndRemoveUser,
+  findUser,
+  findWithNameAndPass,
+  getUsers,
+  isAvailableUsername,
+  updateUserLogoff,
+  updateUserSocket,
+};

@@ -1,9 +1,12 @@
+import dotenv from 'dotenv';
 import fastify from 'fastify';
 import fastifyHelmet from 'fastify-helmet';
 import fastifyIO from 'fastify-socket.io';
 import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
 import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
-import { SocketEventHandlers } from './eventHandlers/SocketEventHandlers';
+import { SocketEventHandlers } from './events/SocketEventHandlers';
+
+dotenv.config();
 
 const server = fastify();
 

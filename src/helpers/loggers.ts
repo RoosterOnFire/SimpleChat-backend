@@ -11,5 +11,9 @@ export function logAdmin(message: string) {
 }
 
 export function logDatabase(message: string) {
-  log(`[${chalk.yellow('DB')}] ${message}`);
+  if (process.env.DB_LOG === 'long') {
+    log(`[${chalk.yellow('DB')}] ${message}`);
+  } else if (process.env.DB_LOG === 'short') {
+    log(`[${chalk.yellow('DB')}] call to db`);
+  }
 }

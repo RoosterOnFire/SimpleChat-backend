@@ -1,7 +1,7 @@
-import { UserRespository } from '../helpers/database';
 import { logInfo } from '../helpers/loggers';
 import { ChatSocket, UserInstance } from '../types/types';
 import { broadcastDisconnection } from '../helpers/EventBroadcasters';
+import { UserRespository } from '../repositories/users';
 
 export async function handleExistingUser(
   User: UserInstance,
@@ -14,17 +14,26 @@ export async function handleExistingUser(
   await UserRespository.updateUserSocket(User.user_id, socket.id);
 
   // set event
-  socket.on('room:create', (payload: { name: string; callback?: Function }) => {
-    socket.join(payload.name);
-  });
+  socket.on(
+    'rooms:create',
+    (payload: { roomName: string; callback?: Function }) => {
+      socket.join(payload.roomName);
+    }
+  );
 
-  socket.on('room:join', (payload: { name: string; callback?: Function }) => {
-    socket.join(payload.name);
-  });
+  socket.on(
+    'rooms:join',
+    (payload: { roomName: string; callback?: Function }) => {
+      socket.join(payload.roomName);
+    }
+  );
 
-  socket.on('room:leave', (payload: { name: string; callback?: Function }) => {
-    socket.join(payload.name);
-  });
+  socket.on(
+    'rooms:leave',
+    (payload: { roomName: string; callback?: Function }) => {
+      socket.leave(payload.roomName);
+    }
+  );
 
   socket.on('chat:message', (payload: any) => {
     socket.broadcast.emit('chat:message', payload);

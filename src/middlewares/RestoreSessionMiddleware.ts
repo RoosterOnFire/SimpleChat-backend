@@ -1,6 +1,6 @@
 import { ChatSocket, SocketMiddlewareNext } from '../types/types';
-import { UserRespository } from '../helpers/database';
 import { logInfo } from '../helpers/loggers';
+import { UserRespository } from '../repositories/users';
 
 export async function RestoreSessionMiddleware(
   socket: ChatSocket,

@@ -1,7 +1,7 @@
 import { ChatSocket, SocketMiddlewareNext } from '../types/types';
 import { Errors } from '../types/enums';
-import { UserRespository } from '../helpers/database';
-import { logAdmin, logInfo } from '../helpers/loggers';
+import { logInfo } from '../helpers/loggers';
+import { UserRespository } from '../repositories/users';
 
 export async function UserValidationMiddleware(
   socket: ChatSocket,

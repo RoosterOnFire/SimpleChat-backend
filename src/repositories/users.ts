@@ -1,56 +1,6 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { UserInstance, UserInstances } from '../types/types';
 import { Roles } from '../types/enums';
-import { logDatabase } from './loggers';
-import { createRndId } from './helpers';
-
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  logging: logDatabase,
-});
-
-const UserModel = sequelize.define<UserInstance>('User', {
-  socket_id: {
-    type: DataTypes.STRING,
-  },
-  user_id: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    primaryKey: true,
-  },
-  session_id: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  username: {
-    type: DataTypes.STRING,
-  },
-  password: {
-    type: DataTypes.STRING,
-  },
-  role: {
-    type: DataTypes.STRING,
-  },
-});
-
-UserModel.sync().then(() => {
-  /** HARD CODED TEST USERS */
-  UserModel.create({
-    user_id: createRndId(),
-    session_id: createRndId(),
-    username: 'admin',
-    password: 'admin',
-    role: Roles.ADMIN,
-  });
-
-  UserModel.create({
-    user_id: createRndId(),
-    session_id: createRndId(),
-    username: 'user',
-    password: 'user',
-    role: Roles.USER,
-  });
-});
+import { UserInstance, UserInstances } from '../types/types';
+import { UserModel } from './sequelize';
 
 async function createUser({
   session,
@@ -104,6 +54,10 @@ async function updateUserLogoff(user_id: string) {
   );
 }
 
+async function updateUserSession(user: string, session: string) {
+  await UserModel.update({ session_id: session }, { where: { user_id: user } });
+}
+
 async function updateUserSocket(user: string, socket: string) {
   await UserModel.update({ socket }, { where: { user_id: user } });
 }
@@ -132,12 +86,6 @@ async function getUsers(): Promise<UserInstances> {
   return UserModel.findAll();
 }
 
-async function isAvailableUsername(username: string) {
-  return await UserModel.findAndCountAll({ where: { username } }).then(
-    (users) => users.count > 0
-  );
-}
-
 async function deleteUser(userId: string): Promise<string | undefined> {
   const User = await UserModel.findOne({ where: { user_id: userId } });
 
@@ -146,6 +94,12 @@ async function deleteUser(userId: string): Promise<string | undefined> {
   User?.destroy();
 
   return socket;
+}
+
+async function isAvailableUsername(username: string) {
+  return await UserModel.findAndCountAll({ where: { username } }).then(
+    (users) => users.count > 0
+  );
 }
 
 export const UserRespository = {
@@ -158,5 +112,6 @@ export const UserRespository = {
   getUsers,
   isAvailableUsername,
   updateUserLogoff,
+  updateUserSession,
   updateUserSocket,
 };

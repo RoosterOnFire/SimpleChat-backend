@@ -32,3 +32,10 @@ export interface UserInstance extends Model {
 }
 
 export type UserInstances = UserInstance[];
+
+export interface RoomInstance extends Model {
+  name: string;
+  users: string;
+}
+
+export type RoomInstances = RoomInstance[];

@@ -1,6 +1,6 @@
 import { ChatSocket, SocketMiddlewareNext } from '../types/types';
 import { logInfo } from '../helpers/loggers';
-import { UserRespository } from '../repositories/users';
+import UserRepository from '../repositories/UserRepository';
 
 export async function RestoreSessionMiddleware(
   socket: ChatSocket,
@@ -14,7 +14,7 @@ export async function RestoreSessionMiddleware(
     return next();
   }
 
-  const User = await UserRespository.findUser(sessionId);
+  const User = await UserRepository.findUser(sessionId);
   socket.user = User ?? undefined;
   if (socket.user) {
     logInfo('-- Existing session restored');

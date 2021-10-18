@@ -17,3 +17,8 @@ export function logDatabase(message: string) {
     log(`[${chalk.yellow('DB')}] call to db`);
   }
 }
+
+export function logError(error: any) {
+  log(`[${chalk.red('ERROR')}] ${error?.message}`);
+  log(error?.stack);
+}

@@ -4,7 +4,7 @@ import fastifyHelmet from 'fastify-helmet';
 import fastifyIO from 'fastify-socket.io';
 import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
 import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
-import { SocketEventHandlers } from './events/SocketEventHandlers';
+import { SocketConnectionHandler } from './events/SocketEventHandlers';
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ server.register(fastifyIO, {
 server.ready().then(() => {
   server.io.use(RestoreSessionMiddleware);
   server.io.use(UserValidationMiddleware);
-  server.io.on('connection', SocketEventHandlers);
+  server.io.on('connection', SocketConnectionHandler);
 });
 
 server.listen(4000);

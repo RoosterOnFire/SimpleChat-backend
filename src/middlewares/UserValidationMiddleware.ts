@@ -1,7 +1,7 @@
 import { ChatSocket, SocketMiddlewareNext } from '../types/types';
 import { Errors } from '../types/enums';
-import { logInfo } from '../helpers/loggers';
-import { UserRespository } from '../repositories/users';
+import { logError, logInfo } from '../helpers/loggers';
+import UserRepository from '../repositories/UserRepository';
 
 export async function UserValidationMiddleware(
   socket: ChatSocket,
@@ -16,19 +16,20 @@ export async function UserValidationMiddleware(
   const auth = socket.handshake.auth;
 
   if (!auth.username) {
-    logInfo('-- user validation error: missing username');
+    logError('-- user validation error: missing username');
     return next(new Error(Errors.ERROR_MISSING_USERNAME));
   } else if (!auth.password) {
-    logInfo('-- user validation error: missing password');
+    logError('-- user validation error: missing password');
     return next(new Error(Errors.ERROR_MISSING_PASSWORD));
   }
 
-  const User = await UserRespository.findWithNameAndPass(
+  const User = await UserRepository.findWithNameAndPass(
     auth.username,
     auth.password
   );
+
   if (User === null) {
-    logInfo('-- user validation error');
+    logError('-- user validation error');
     return next(new Error(Errors.ERROR_INVALID_SING_IN));
   } else {
     socket.user = User;

@@ -1,37 +1,45 @@
-import { logInfo } from '../helpers/loggers';
-import { ChatSocket, UserInstance } from '../types/types';
+import { logError, logInfo } from '../helpers/loggers';
+import {
+  ChatSocket,
+  SocketRoomsCallback,
+  SocketRoomsPayload,
+} from '../types/types';
 import { broadcastDisconnection } from '../helpers/EventBroadcasters';
-import { UserRespository } from '../repositories/users';
+import UserRespository from '../repositories/UserRepository';
+import User from '../models/UserModel';
 
-export async function handleExistingUser(
-  User: UserInstance,
+export default async function handleExistingUser(
+  User: User,
   socket: ChatSocket
 ) {
   socket.prependAny((eventName) => {
     logInfo(`Emit: ${eventName}`);
   });
 
-  await UserRespository.updateUserSocket(User.user_id, socket.id);
-
-  // set event
   socket.on(
     'rooms:create',
-    (payload: { roomName: string; callback?: Function }) => {
+    (payload: SocketRoomsPayload, callback: SocketRoomsCallback) => {
       socket.join(payload.roomName);
+
+      callback({ success: true, message: 'Room created' });
     }
   );
 
   socket.on(
     'rooms:join',
-    (payload: { roomName: string; callback?: Function }) => {
+    (payload: SocketRoomsPayload, callback: SocketRoomsCallback) => {
       socket.join(payload.roomName);
+
+      callback({ success: true, message: 'Joined room' });
     }
   );
 
   socket.on(
     'rooms:leave',
-    (payload: { roomName: string; callback?: Function }) => {
+    (payload: SocketRoomsPayload, callback: SocketRoomsCallback) => {
       socket.leave(payload.roomName);
+
+      callback({ success: true, message: 'Left room' });
     }
   );
 
@@ -45,7 +53,7 @@ export async function handleExistingUser(
       const [count, Users] = await UserRespository.updateUserLogoff(
         payload.userId
       );
-      if (count === 1) {
+      if (count === 1 && Users[0].socket_id) {
         socket.to(Users[0].socket_id).emit('session:close');
 
         callback && callback({ message: `User ${payload.userId} kicked` });
@@ -73,11 +81,18 @@ export async function handleExistingUser(
     await broadcastDisconnection(socket);
   });
 
-  // emit
-  socket.emit('connect:valid', {
-    role: User.role,
-    sessionId: User.session_id,
-    userId: User.user_id,
-    username: User.username,
-  });
+  try {
+    await UserRespository.updateUserSocket(User.user_id, socket.id);
+
+    const userMeta = await User.getMeta();
+
+    socket.emit('connect:valid', {
+      role: userMeta.role,
+      sessionId: User.session_id,
+      userId: User.user_id,
+      username: User.username,
+    });
+  } catch (error) {
+    logError(error);
+  }
 }

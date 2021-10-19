@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import { RoomInstance } from '../types/types';
-import { sequelize } from '../helpers/ConnectionSequelize';
+import { connection } from './Connection';
 
-export default sequelize.define<RoomInstance>('Rooms', {
+export default connection.define<RoomInstance>('Rooms', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,

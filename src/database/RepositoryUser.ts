@@ -1,5 +1,5 @@
-import UserMeta from '../models/UserMetaModel';
-import User from '../models/UserModel';
+import UserMeta from './ModelUserMeta';
+import User from './ModelUser';
 import { Roles } from '../types/enums';
 
 async function createUser({

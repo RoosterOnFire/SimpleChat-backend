@@ -1,9 +1,10 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import UserMeta from '../models/UserMetaModel';
-import User from '../models/UserModel';
+import { logError, logInfo } from '../helpers/loggers';
 import { Roles } from '../types/enums';
+import UserMeta from './ModelUserMeta';
+import User from './ModelUser';
 
-export const sequelize = new Sequelize(
+export const connection = new Sequelize(
   'simplechat',
   'simplechat',
   'simplechat',
@@ -13,6 +14,11 @@ export const sequelize = new Sequelize(
     port: 3306,
   }
 );
+
+connection
+  .authenticate()
+  .then(() => logInfo('Database connected'))
+  .catch(logError);
 
 User.init(
   {
@@ -35,7 +41,21 @@ User.init(
       type: DataTypes.STRING,
     },
   },
-  { sequelize }
+  { sequelize: connection }
+);
+
+UserMeta.init(
+  {
+    user_id: {
+      type: DataTypes.STRING,
+    },
+    role: {
+      type: DataTypes.STRING,
+    },
+  },
+  {
+    sequelize: connection,
+  }
 );
 
 User.hasOne(UserMeta, {
@@ -47,7 +67,6 @@ UserMeta.belongsTo(User);
 
 Promise.all([User.sync(), UserMeta.sync()]).then(() => {
   /** HARD CODED TEST USERS */
-
   Promise.all([
     User.findOrCreate({
       where: {

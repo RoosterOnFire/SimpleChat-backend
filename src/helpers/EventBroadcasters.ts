@@ -1,6 +1,6 @@
 import { logInfo } from './loggers';
 import { ChatSocket } from '../types/types';
-import UserRespository from '../repositories/UserRepository';
+import UserRespository from '../database/RepositoryUser';
 
 export async function broadcastDisconnection(socket: ChatSocket) {
   if (socket.user?.user_id && socket.user?.session_id) {

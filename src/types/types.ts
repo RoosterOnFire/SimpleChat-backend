@@ -1,7 +1,7 @@
-import { Model, Optional } from 'sequelize/types';
+import { Model } from 'sequelize/types';
 import { Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
-import User from '../models/UserModel';
+import User from '../database/ModelUser';
 import { Roles } from './enums';
 
 export type ChatSocket = Socket & {
@@ -18,24 +18,6 @@ export type ChatSession = {
   userId: string;
   sessionId: string;
 };
-
-export interface UserAttributes {
-  password: string;
-  session_id: string;
-  socket_id: string | null;
-  user_id: string;
-  username: string;
-}
-
-export interface UserCreationAttributes
-  extends Optional<UserAttributes, 'user_id'> {}
-
-export interface UserMetaAttributes {
-  user_id?: string;
-  role: string;
-}
-
-export interface UserMetaCreationAttributes extends UserMetaAttributes {}
 
 export interface RoomInstance extends Model {
   name: string;

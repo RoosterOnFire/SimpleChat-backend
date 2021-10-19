@@ -1,4 +1,4 @@
-import RoomModel from '../models/RoomModel';
+import RoomModel from './ModelRoom';
 
 RoomModel.sync();
 

@@ -5,6 +5,7 @@ import fastifyIO from 'fastify-socket.io';
 import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
 import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
 import { SocketConnectionHandler } from './events/SocketEventHandlers';
+import { connection } from './database/Connection';
 
 dotenv.config();
 
@@ -18,10 +19,16 @@ server.register(fastifyIO, {
   },
 });
 
-server.ready().then(() => {
-  server.io.use(RestoreSessionMiddleware);
-  server.io.use(UserValidationMiddleware);
-  server.io.on('connection', SocketConnectionHandler);
-});
+server
+  .ready()
+  .then(() => {
+    server.io.use(RestoreSessionMiddleware);
+    server.io.use(UserValidationMiddleware);
+  })
+  .then(() => {
+    connection;
+
+    server.io.on('connection', SocketConnectionHandler);
+  });
 
 server.listen(4000);

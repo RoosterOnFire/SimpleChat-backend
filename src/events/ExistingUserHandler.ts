@@ -5,8 +5,8 @@ import {
   SocketRoomsPayload,
 } from '../types/types';
 import { broadcastDisconnection } from '../helpers/EventBroadcasters';
-import UserRespository from '../repositories/UserRepository';
-import User from '../models/UserModel';
+import UserRespository from '../database/RepositoryUser';
+import User from '../database/ModelUser';
 
 export default async function handleExistingUser(
   User: User,

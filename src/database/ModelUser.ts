@@ -3,10 +3,21 @@ import {
   HasOneCreateAssociationMixin,
   HasOneGetAssociationMixin,
   Model,
+  Optional,
 } from 'sequelize';
 import { HasOneSetAssociationMixin } from 'sequelize';
-import { UserAttributes, UserCreationAttributes } from '../types/types';
-import UserMeta from './UserMetaModel';
+import UserMeta from './ModelUserMeta';
+
+export interface UserAttributes {
+  password: string;
+  session_id: string;
+  socket_id: string | null;
+  user_id: string;
+  username: string;
+}
+
+export interface UserCreationAttributes
+  extends Optional<UserAttributes, 'user_id'> {}
 
 export default class User
   extends Model<UserAttributes, UserCreationAttributes>

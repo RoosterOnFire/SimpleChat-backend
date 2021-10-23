@@ -32,9 +32,9 @@ export async function UserValidationMiddleware(
     if (User === null) {
       logError('-- user validation error');
       return next(new Error(Errors.ERROR_INVALID_SING_IN));
-    } else {
-      socket.user = User;
     }
+
+    socket.user = User;
 
     return next();
   } catch (error) {

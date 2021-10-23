@@ -9,3 +9,8 @@ export enum Errors {
   ERROR_MISSING_PASSWORD = 'ERROR_MISSING_PASSWORD',
   ERROR_NICKNAME_IN_USE = 'ERROR_NICKNAME_IN_USE',
 }
+
+export enum RealmSchemas {
+  USER = 'User',
+  ROOM = 'Room',
+}

@@ -1,15 +1,16 @@
 import { logError, logInfo } from '../helpers/loggers';
 import {
   ChatSocket,
+  ChatUser,
   SocketRoomsCallback,
   SocketRoomsPayload,
 } from '../types/types';
 import { broadcastDisconnection } from '../helpers/EventBroadcasters';
 import UserRespository from '../database/RepositoryUser';
-import User from '../database/ModelUser';
+import { Roles } from '../types/enums';
 
 export default async function handleExistingUser(
-  User: User,
+  User: ChatUser,
   socket: ChatSocket
 ) {
   socket.prependAny((eventName) => {
@@ -50,30 +51,23 @@ export default async function handleExistingUser(
   socket.on(
     'user:kick',
     async (payload: { userId: string }, callback?: Function) => {
-      const [count, Users] = await UserRespository.updateUserLogoff(
-        payload.userId
-      );
-      if (count === 1 && Users[0].socket_id) {
-        socket.to(Users[0].socket_id).emit('session:close');
-
+      try {
+        await UserRespository.updateUserLogoff(payload.userId);
         callback && callback({ message: `User ${payload.userId} kicked` });
-      } else {
+      } catch (error) {
         callback && callback({ error: `User ${payload.userId} not found` });
       }
     }
   );
 
   socket.on('user:logoff', async (callback: Function) => {
-    if (socket.user?.user_id) {
-      const [updated] = await UserRespository.updateUserLogoff(
-        socket.user?.user_id
-      );
-
-      if (updated === 1) {
+    try {
+      if (socket.user?.userId) {
+        await UserRespository.updateUserLogoff(socket.user?.userId);
         callback({ status: true, message: 'User logoff succesfully' });
-      } else {
-        callback({ status: false, error: 'ERROR' });
       }
+    } catch (error) {
+      callback({ status: false, error: 'ERROR' });
     }
   });
 
@@ -82,14 +76,12 @@ export default async function handleExistingUser(
   });
 
   try {
-    await UserRespository.updateUserSocket(User.user_id, socket.id);
-
-    const userMeta = await User.getMeta();
+    await UserRespository.updateUserSocket(User.userId, socket.id);
 
     socket.emit('connect:valid', {
-      role: userMeta.role,
-      sessionId: User.session_id,
-      userId: User.user_id,
+      role: Roles.ADMIN,
+      sessionId: User.sessionId,
+      userId: User.userId,
       username: User.username,
     });
   } catch (error) {

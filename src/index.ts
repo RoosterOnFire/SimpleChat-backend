@@ -5,7 +5,7 @@ import fastifyIO from 'fastify-socket.io';
 import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
 import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
 import { SocketConnectionHandler } from './events/SocketEventHandlers';
-import { connection } from './database/Connection';
+import { migrateUsers } from './database/MigrationUser';
 
 dotenv.config();
 
@@ -26,8 +26,9 @@ server
     server.io.use(UserValidationMiddleware);
   })
   .then(() => {
-    connection;
-
+    migrateUsers();
+  })
+  .then(() => {
     server.io.on('connection', SocketConnectionHandler);
   });
 

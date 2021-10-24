@@ -2,9 +2,8 @@ import dotenv from 'dotenv';
 import fastify from 'fastify';
 import fastifyHelmet from 'fastify-helmet';
 import fastifyIO from 'fastify-socket.io';
-import { UserValidationMiddleware } from './middlewares/UserValidationMiddleware';
-import { RestoreSessionMiddleware } from './middlewares/RestoreSessionMiddleware';
-import { SocketConnectionHandler } from './events/SocketEventHandlers';
+import { MiddlewareRestoreSession } from './middlewares/MiddlewareRestoreSession';
+import { SocketHandler } from './events/SocketHandler';
 import { migrateUsers } from './database/MigrationUser';
 
 dotenv.config();
@@ -22,14 +21,11 @@ server.register(fastifyIO, {
 server
   .ready()
   .then(() => {
-    server.io.use(RestoreSessionMiddleware);
-    server.io.use(UserValidationMiddleware);
-  })
-  .then(() => {
     migrateUsers();
   })
   .then(() => {
-    server.io.on('connection', SocketConnectionHandler);
+    server.io.use(MiddlewareRestoreSession);
+    server.io.on('connection', SocketHandler);
   });
 
 server.listen(4000);

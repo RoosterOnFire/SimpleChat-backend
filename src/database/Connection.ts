@@ -5,14 +5,13 @@ import { ChatUser } from '../types/types';
 const SchemaUser = {
   name: 'User',
   properties: {
-    _id: 'int',
     password: 'string',
-    sessionId: 'string',
-    socketId: 'string',
+    sessionId: 'string?',
+    socketId: 'string?',
     userId: 'string',
     username: 'string',
   },
-  primaryKey: '_id',
+  primaryKey: 'userId',
 };
 
 const SchemaUserMeta = {
@@ -26,7 +25,7 @@ export async function openRealm() {
   return await Realm.open({
     path: 'simplechat',
     schema: [SchemaUser, SchemaUserMeta],
-    schemaVersion: 0,
+    schemaVersion: 1,
   });
 }
 

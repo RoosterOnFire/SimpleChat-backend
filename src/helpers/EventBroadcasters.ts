@@ -1,4 +1,4 @@
-import { logInfo } from './loggers';
+import { logInfo } from './Loggers';
 import { ChatSocket } from '../types/types';
 import UserRespository from '../database/RepositoryUser';
 

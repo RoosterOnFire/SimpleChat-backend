@@ -1,5 +1,5 @@
 import { logInfo } from './Loggers';
-import { ChatSocket } from '../types/types';
+import { ChatSocket } from '../types/TypeBase';
 import UserRespository from '../database/RepositoryUser';
 
 export async function broadcastDisconnection(socket: ChatSocket) {

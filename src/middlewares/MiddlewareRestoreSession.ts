@@ -1,4 +1,4 @@
-import { ChatSocket, SocketMiddlewareNext } from '../types/types';
+import { ChatSocket, SocketMiddlewareNext } from '../types/TypeBase';
 import { logError } from '../helpers/Loggers';
 import UserRepository from '../database/RepositoryUser';
 

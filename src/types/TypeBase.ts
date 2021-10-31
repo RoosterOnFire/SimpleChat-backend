@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
-import { Roles } from './enums';
+import { Roles } from './TypeEnums';
 
 export type ChatUser = {
   password: string;

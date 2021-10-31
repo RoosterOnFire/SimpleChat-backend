@@ -1,8 +1,8 @@
 import { openRealm, openUser } from '../database/Connection';
 import UserRepository from '../database/RepositoryUser';
 import { createRndId } from '../helpers/helpers';
-import { Errors, RealmSchemas, Roles } from '../types/enums';
-import { ChatSocket, ChatSocketMessages, ChatUser } from '../types/types';
+import { Errors, RealmSchemas, Roles } from '../types/TypeEnums';
+import { ChatSocket, ChatSocketMessages, ChatUser } from '../types/TypeBase';
 
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
@@ -12,8 +12,6 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       callback: Function
     ) => {
       try {
-        const realm = await openRealm();
-
         const isExistingUser = (await openUser()).find(
           (user) => user.username === payload.username
         );
@@ -22,6 +20,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
         }
 
         const userId = createRndId();
+        const realm = await openRealm();
         realm.write(() => {
           realm.create<ChatUser>(RealmSchemas.USER, {
             userId,
@@ -58,8 +57,20 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       payload: { username: string; password: string },
       callback: Function
     ) => {
+      if (socket.user) {
+        callback({
+          success: true,
+          data: {
+            role: Roles.ADMIN,
+            sessionId: socket.user.sessionId,
+            userId: socket.user.userId,
+            username: socket.user.username,
+          },
+        });
+      }
+
       const isValid = validateFields(payload);
-      if (isValid.valid === false) {
+      if (!isValid.valid) {
         callback({
           success: false,
           error: isValid.error,

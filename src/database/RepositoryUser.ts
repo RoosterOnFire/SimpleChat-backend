@@ -1,4 +1,4 @@
-import { ChatUser } from '../types/types';
+import { ChatUser } from '../types/TypeBase';
 import { openRealm, openUser } from './Connection';
 
 async function findUserWithId(userId: string) {

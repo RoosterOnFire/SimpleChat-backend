@@ -1,6 +1,6 @@
 import Realm from 'realm';
-import { RealmSchemas } from '../types/enums';
-import { ChatUser } from '../types/types';
+import { RealmSchemas } from '../types/TypeEnums';
+import { ChatUser } from '../types/TypeBase';
 
 const SchemaUser = {
   name: 'User',

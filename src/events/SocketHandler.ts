@@ -1,5 +1,5 @@
 import { logError, logInfo } from '../helpers/Loggers';
-import { ChatSocket, ChatSocketMessages } from '../types/types';
+import { ChatSocket, ChatSocketMessages } from '../types/TypeBase';
 import { broadcastDisconnection } from '../helpers/EventBroadcasters';
 import registerRoomsEvents from './registerRoomsEvents';
 import registerUserEvents from './registerUserEvents';

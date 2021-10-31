@@ -1,4 +1,8 @@
-import { ChatSocket, SocketCallback, SocketRoomsPayload } from '../types/types';
+import {
+  ChatSocket,
+  SocketCallback,
+  SocketRoomsPayload,
+} from '../types/TypeBase';
 
 export default function registerRoomsEvents(socket: ChatSocket) {
   socket.on(

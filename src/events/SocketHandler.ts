@@ -15,9 +15,19 @@ export async function SocketHandler(socket: ChatSocket) {
     registerRoomsEvents(socket);
     registerUserEvents(socket);
 
-    socket.on(ChatSocketMessages.CHAT_MESSAGE, (payload: any) => {
-      socket.broadcast.emit('chat:message', payload);
-    });
+    socket.on(
+      ChatSocketMessages.CHAT_MESSAGE,
+      (payload: {
+        room: string;
+        message: {
+          id: number;
+          user: string;
+          value: string;
+        };
+      }) => {
+        socket.to(payload.room).emit('chat:message', payload);
+      }
+    );
 
     socket.on('disconnect', async () => {
       await broadcastDisconnection(socket);

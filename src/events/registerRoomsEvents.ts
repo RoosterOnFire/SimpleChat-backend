@@ -10,7 +10,13 @@ export default function registerRoomsEvents(socket: ChatSocket) {
     (payload: SocketRoomsPayload, callback: SocketCallback) => {
       socket.join(payload.roomName);
 
-      callback({ success: true, message: 'Room created' });
+      callback({
+        success: true,
+        message: 'Room created',
+        data: {
+          name: payload.roomName,
+        },
+      });
     }
   );
 
@@ -19,7 +25,13 @@ export default function registerRoomsEvents(socket: ChatSocket) {
     (payload: SocketRoomsPayload, callback: SocketCallback) => {
       socket.join(payload.roomName);
 
-      callback({ success: true, message: 'Joined room' });
+      callback({
+        success: true,
+        message: 'Joined room',
+        data: {
+          name: payload.roomName,
+        },
+      });
     }
   );
 

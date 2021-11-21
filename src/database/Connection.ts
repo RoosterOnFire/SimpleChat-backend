@@ -1,30 +1,17 @@
 import Realm from 'realm';
 import { RealmSchemas } from '../types/TypeEnums';
 import { ChatUser } from '../types/TypeBase';
-
-const SchemaUser = {
-  name: 'User',
-  properties: {
-    password: 'string',
-    sessionId: 'string?',
-    socketId: 'string?',
-    userId: 'string',
-    username: 'string',
-  },
-  primaryKey: 'userId',
-};
-
-const SchemaUserMeta = {
-  name: 'UserMeta',
-  properties: {
-    role: 'string',
-  },
-};
+import {
+  SchemaRoomMessge,
+  SchemaRooms,
+  SchemaUser,
+  SchemaUserMeta,
+} from './Schemas';
 
 export async function openRealm() {
   return await Realm.open({
     path: 'simplechat',
-    schema: [SchemaUser, SchemaUserMeta],
+    schema: [SchemaUser, SchemaUserMeta, SchemaRooms, SchemaRoomMessge],
     schemaVersion: 1,
   });
 }

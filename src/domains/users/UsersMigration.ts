@@ -1,7 +1,7 @@
 import { User } from 'realm';
-import { logDatabase, logError } from '../helpers/Loggers';
-import { RealmSchemas, Roles } from '../types/TypeEnums';
-import { openRealm } from './Connection';
+import { logDatabase, logError } from '../../helpers/loggers';
+import { RealmSchemas, Roles } from '../../types/TypeEnums';
+import { openRealm } from '../../database/Connection';
 
 export async function migrateUsers() {
   try {

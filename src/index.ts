@@ -4,7 +4,7 @@ import fastifyHelmet from 'fastify-helmet';
 import fastifyIO from 'fastify-socket.io';
 import { MiddlewareRestoreSession } from './middlewares/MiddlewareRestoreSession';
 import { SocketHandler } from './events/SocketHandler';
-import { migrateUsers } from './database/MigrationUser';
+import { migrateUsers } from './domains/users/UsersMigration';
 
 dotenv.config();
 

@@ -1,5 +1,5 @@
-import UserRepository from '../database/RepositoryUser';
-import { ChatSocket } from '../types/TypeBase';
+import UserRepository from './UsersRepository';
+import { ChatSocket } from '../../types/TypeBase';
 
 export default function registerUserEvents(socket: ChatSocket) {
   socket.on(

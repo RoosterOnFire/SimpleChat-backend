@@ -1,6 +1,6 @@
 import { ChatSocket, SocketMiddlewareNext } from '../types/TypeBase';
-import { logError } from '../helpers/Loggers';
-import UserRepository from '../database/RepositoryUser';
+import { logError } from '../helpers/loggers';
+import UserRepository from '../domains/users/UsersRepository';
 
 export async function MiddlewareRestoreSession(
   socket: ChatSocket,

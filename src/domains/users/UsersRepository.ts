@@ -1,5 +1,5 @@
-import { ChatUser } from '../types/TypeBase';
-import { openRealm, openUser } from './Connection';
+import { ChatUser } from '../../types/TypeBase';
+import { openRealm, openUser } from '../../database/Connection';
 
 async function findUserWithId(userId: string) {
   const users = (await openUser()).filtered('userId == $0', userId);

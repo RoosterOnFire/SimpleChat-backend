@@ -14,5 +14,5 @@ export enum Errors {
 export enum RealmSchemas {
   USER = 'User',
   USER_META = 'UserMeta',
-  ROOM = 'Room',
+  ROOMS = 'Rooms',
 }

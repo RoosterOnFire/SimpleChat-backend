@@ -1,5 +1,5 @@
 import { openRealm, openUser } from '../database/Connection';
-import UserRepository from '../database/RepositoryUser';
+import UserRepository from '../domains/users/UsersRepository';
 import { createRndId } from '../helpers/helpers';
 import { Errors, RealmSchemas, Roles } from '../types/TypeEnums';
 import { ChatSocket, ChatSocketMessages, ChatUser } from '../types/TypeBase';

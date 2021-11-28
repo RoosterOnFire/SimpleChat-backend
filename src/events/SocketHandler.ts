@@ -1,8 +1,8 @@
-import { logError, logInfo } from '../helpers/Loggers';
+import { logError, logInfo } from '../helpers/loggers';
 import { ChatSocket, ChatSocketMessages } from '../types/TypeBase';
 import { broadcastDisconnection } from '../helpers/EventBroadcasters';
-import registerRoomsEvents from './registerRoomsEvents';
-import registerUserEvents from './registerUserEvents';
+import registerRoomsEvents from '../domains/rooms/RoomsSocketEvents';
+import registerUserEvents from '../domains/users/UsersSocketEvents';
 import registerConnnectEvents from './registerConnnectEvents';
 
 export async function SocketHandler(socket: ChatSocket) {

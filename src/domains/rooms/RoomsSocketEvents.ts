@@ -1,29 +1,20 @@
+import RepositoryRoom from './RoomsRepository';
 import {
   ChatSocket,
   SocketCallback,
   SocketRoomsPayload,
-} from '../types/TypeBase';
+} from '../../types/TypeBase';
 
 export default function registerRoomsEvents(socket: ChatSocket) {
   socket.on(
-    'rooms:create',
-    (payload: SocketRoomsPayload, callback: SocketCallback) => {
-      socket.join(payload.roomName);
-
-      callback({
-        success: true,
-        message: 'Room created',
-        data: {
-          name: payload.roomName,
-        },
-      });
-    }
-  );
-
-  socket.on(
     'rooms:join',
-    (payload: SocketRoomsPayload, callback: SocketCallback) => {
+    async (payload: SocketRoomsPayload, callback: SocketCallback) => {
       socket.join(payload.roomName);
+
+      await RepositoryRoom.createRoom(payload.roomName);
+      if (socket.user) {
+        await RepositoryRoom.addUser(payload.roomName, socket.user.username);
+      }
 
       callback({
         success: true,

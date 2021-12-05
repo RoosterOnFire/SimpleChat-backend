@@ -6,7 +6,7 @@ export default function registerUserEvents(socket: ChatSocket) {
     'user:kick',
     async (payload: { userId: string }, callback?: Function) => {
       try {
-        await UserRepository.updateUserLogoff(payload.userId);
+        // await UserRepository.updateLogoff(payload.userId);
         callback && callback({ message: `User ${payload.userId} kicked` });
       } catch (error) {
         callback && callback({ error: `User ${payload.userId} not found` });

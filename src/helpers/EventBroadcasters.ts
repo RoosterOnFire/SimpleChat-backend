@@ -3,10 +3,11 @@ import { ChatSocket } from '../types/TypeBase';
 import UserRespository from '../domains/users/UsersRepository';
 
 export async function broadcastDisconnection(socket: ChatSocket) {
-  if (socket.user?.userId && socket.user?.sessionId) {
-    logInfo(`${socket.user.userId} disconnected`);
+  if (socket.user?.username && socket.user?.userMetaId) {
+    logInfo(`${socket.user.username} disconnected`);
 
-    const User = await UserRespository.findUser(socket.user.sessionId);
-    socket.broadcast.emit('chat:leave', { ...User });
+    await UserRespository.updateSession(socket.user, '');
+
+    socket.broadcast.emit('chat:leave', { ...socket.user });
   }
 }

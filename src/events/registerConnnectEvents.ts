@@ -1,8 +1,6 @@
-import { openRealm, openUser } from '../database/Connection';
 import UserRepository from '../domains/users/UsersRepository';
-import { createRndId } from '../helpers/helpers';
-import { Errors, RealmSchemas, Roles } from '../types/TypeEnums';
-import { ChatSocket, ChatSocketMessages, ChatUser } from '../types/TypeBase';
+import { Errors, Roles } from '../types/TypeEnums';
+import { ChatSocket, ChatSocketMessages } from '../types/TypeBase';
 
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
@@ -12,41 +10,29 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       callback: Function
     ) => {
       try {
-        const isExistingUser = (await openUser()).find(
-          (user) => user.username === payload.username
+        const isExistingUser = await UserRepository.isUsernameUsed(
+          payload.username
         );
         if (isExistingUser) {
           throw new Error(Errors.ERROR_USERNAME_IN_USE);
         }
 
-        const userId = createRndId();
-        const realm = await openRealm();
-        realm.write(() => {
-          realm.create<ChatUser>(RealmSchemas.USER, {
-            userId,
-            username: payload.username,
-            password: payload.password,
-            sessionId: createRndId(),
-            socketId: socket.id,
-          });
-        });
-
-        const user = (await openUser()).filtered('userId == $0', userId)[0];
+        const user = await UserRepository.create(
+          payload.username,
+          payload.password,
+          socket.id
+        );
 
         callback({
           success: true,
           data: {
             role: Roles.ADMIN,
-            sessionId: user.sessionId,
-            userId: user.userId,
+            sessionId: user.meta.sessionId,
             username: user.username,
           },
         });
       } catch (error) {
-        callback({
-          success: false,
-          error: Errors.ERROR_NEW_USER_NOT_CREATED,
-        });
+        callback({ success: false, error: Errors.ERROR_NEW_USER_NOT_CREATED });
       }
     }
   );
@@ -61,43 +47,36 @@ export default function registerConnnectEvents(socket: ChatSocket) {
         callback({
           success: true,
           data: {
-            role: Roles.ADMIN,
-            sessionId: socket.user.sessionId,
-            userId: socket.user.userId,
             username: socket.user.username,
+            role: socket.user.role,
+            sessionId: socket.user.meta.sessionId,
           },
         });
       }
 
       const isValid = validateFields(payload);
       if (!isValid.valid) {
-        callback({
-          success: false,
-          error: isValid.error,
-        });
+        callback({ success: false, error: isValid.error });
         return;
       }
 
-      const user = await UserRepository.findWithNameAndPass(
+      const user = await UserRepository.findWithNameAndPassword(
         payload.username,
         payload.password
       );
+      console.log('user', user);
       if (user === null) {
-        callback({
-          success: false,
-          error: Errors.ERROR_INVALID_SING_IN,
-        });
+        callback({ success: false, error: Errors.ERROR_INVALID_SING_IN });
         return;
+      } else {
+        await UserRepository.updateSocket(user, socket.id);
       }
-
-      await UserRepository.updateUserSocket(user.userId, socket.id);
 
       callback({
         success: true,
         data: {
           role: Roles.ADMIN,
-          sessionId: user.sessionId,
-          userId: user.userId,
+          sessionId: user,
           username: user.username,
         },
       });
@@ -106,10 +85,10 @@ export default function registerConnnectEvents(socket: ChatSocket) {
 
   socket.on(ChatSocketMessages.CONNECT_LOGOFF, async (callback: Function) => {
     try {
-      if (socket.user?.userId) {
-        await UserRepository.updateUserLogoff(socket.user?.userId);
+      if (socket.user) {
+        await UserRepository.updateLogoff(socket.user);
 
-        callback({ status: true, message: 'User logoff succesfully' });
+        callback({ status: true, message: 'User logged off succesfully' });
 
         socket.disconnect();
       }

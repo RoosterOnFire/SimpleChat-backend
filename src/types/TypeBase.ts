@@ -1,28 +1,14 @@
+import { User, UserMeta } from '../domains/users/UsersType';
 import { Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
-import { Roles } from './TypeEnums';
 
-export type ChatUser = {
-  password: string;
-  sessionId?: string;
-  socketId?: string;
-  userId: string;
-  username: string;
-};
+export type ChatUser = User & { meta: UserMeta };
 
-export type ChatSocket = Socket & {
-  user?: ChatUser;
-};
+export type ChatSocket = Socket & { user?: ChatUser };
 
 export type SocketMiddlewareNext = (err?: ExtendedError) => void;
 
-export type UserMeta = {
-  role: Roles;
-};
-
-export type SocketRoomsPayload = {
-  roomName: string;
-};
+export type SocketRoomsPayload = { roomName: string };
 
 export type SocketCallback = (payload: {
   success: boolean;

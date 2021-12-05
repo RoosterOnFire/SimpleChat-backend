@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  password   String
+  role       Role     @default(USER)
+  meta       UserMeta @relation(fields: [userMetaId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  userMetaId Int      @unique
+}
+
+model UserMeta {
+  id        Int    @id @default(autoincrement())
+  sessionId String @default("")
+  socketId  String @default("")
+  User      User?
+}
+
+enum Role {
+  USER
+  ADMIN
+}

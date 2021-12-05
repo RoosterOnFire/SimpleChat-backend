@@ -1,91 +1,124 @@
 import { ChatUser } from '../../types/TypeBase';
-import { openRealm, openUser } from '../../database/Connection';
+import { prisma } from '../../database/ConnectionPrisma';
+import { User, UserMeta } from './UsersType';
 
-async function findUserWithId(userId: string) {
-  const users = (await openUser()).filtered('userId == $0', userId);
-
-  if (users.isEmpty()) {
-    throw new Error('User not found');
-  }
-
-  return users[0];
-}
-
-async function updateUserLogoff(userId: string) {
-  const user = await findUserWithId(userId);
-  const realm = await openRealm();
-
-  realm.write(() => {
-    user.socketId = '';
-    user.sessionId = '';
+async function create(username: string, password: string, socketId: string) {
+  return await prisma.user.create({
+    data: {
+      username,
+      password,
+      meta: { create: { socketId, sessionId: '' } },
+    },
+    include: { meta: true },
   });
 }
 
-async function updateUserSession(userId: string, sessionId: string) {
-  const user = await findUserWithId(userId);
-  const realm = await openRealm();
-
-  realm.write(() => {
-    user.sessionId = sessionId;
-  });
-}
-
-async function updateUserSocket(userId: string, socketId: string) {
-  const user = await findUserWithId(userId);
-  const realm = await openRealm();
-
-  realm.write(() => {
-    user.sessionId = socketId;
-  });
-}
-
-async function findUserWithSessionId(
-  sessionId: string
-): Promise<ChatUser | null> {
+async function isUsernameUsed(username: string): Promise<boolean> {
   try {
-    return (await openUser()).filtered('sessionId == $0', sessionId)[0];
+    return (await prisma.user.count({ where: { username } })) === 1;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function findWithNameAndPassword(
+  username: string,
+  password: string
+): Promise<(User & { meta: UserMeta }) | null> {
+  try {
+    return await prisma.user.findFirst({
+      where: { username, password },
+      include: { meta: true },
+    });
   } catch (error) {
     return null;
   }
 }
 
-async function findWithNameAndPass(
-  username: string,
-  password: string
-): Promise<ChatUser | null> {
-  const user = (await openUser()).filtered(
-    'username == $0 and password == $1',
-    username,
-    password
-  );
-  if (user.isEmpty()) {
+async function updateSocket(user: User, socketId: string): Promise<boolean> {
+  try {
+    await prisma.userMeta.upsert({
+      where: { id: user.userMetaId },
+      update: { socketId },
+      create: { socketId, sessionId: '' },
+    });
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function updateLogoff(user: User): Promise<boolean> {
+  try {
+    await prisma.userMeta.update({
+      where: { id: user.userMetaId },
+      data: { socketId: '', sessionId: '' },
+    });
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function updateSession(user: User, sessionId: string) {
+  try {
+    await prisma.userMeta.update({
+      where: { id: user.userMetaId },
+      data: { sessionId },
+    });
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function findWithSession(sessionId: string): Promise<ChatUser | null> {
+  try {
+    const userMeta = await prisma.userMeta.findFirst({
+      where: { sessionId },
+      include: { User: true },
+    });
+
+    if (userMeta && userMeta.User) {
+      return await prisma.user.findUnique({
+        where: { id: userMeta.User.id },
+        include: { meta: true },
+      });
+    }
+
+    return null;
+  } catch (error) {
     return null;
   }
-
-  return user[0];
 }
 
-async function findAndRemoveUser(userId: string) {
-  const user = await findUserWithId(userId);
+async function remove(username: string): Promise<boolean> {
+  try {
+    await prisma.user.delete({ where: { username } });
 
-  const realm = await openRealm();
-  realm.write(() => {
-    realm.delete(user);
-  });
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
-async function getUsers(): Promise<ChatUser[]> {
-  return (await openUser()).map((row) => row);
+async function getAll() {
+  return await prisma.user.findMany();
 }
 
 const UserRepository = {
-  findAndRemoveUser,
-  findUser: findUserWithSessionId,
-  findWithNameAndPass,
-  getUsers,
-  updateUserLogoff,
-  updateUserSession,
-  updateUserSocket,
+  create,
+  findWithNameAndPassword,
+  findWithSession,
+  getAll,
+  isUsernameUsed,
+  remove,
+  updateLogoff,
+  updateSession,
+  updateSocket,
 };
 
 export default UserRepository;

@@ -12,9 +12,8 @@ export async function MiddlewareRestoreSession(
     if (!sessionId) {
       return next();
     }
-
-    const User = await UserRepository.findUser(sessionId);
-    socket.user = User ?? undefined;
+    const user = await UserRepository.findWithSession(sessionId);
+    socket.user = user ?? undefined;
 
     return next();
   } catch (error) {

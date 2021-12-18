@@ -54,12 +54,6 @@ export default function registerConnnectEvents(socket: ChatSocket) {
         });
       }
 
-      const isValid = validateFields(payload);
-      if (!isValid.valid) {
-        callback({ success: false, error: isValid.error });
-        return;
-      }
-
       const user = await UserRepository.findWithNameAndPassword(
         payload.username,
         payload.password
@@ -96,23 +90,4 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       callback({ status: false, error: 'ERROR' });
     }
   });
-}
-
-function validateFields(auth: { username: string; password: string }) {
-  const result: { valid: boolean; error: Errors | undefined } = {
-    valid: false,
-    error: undefined,
-  };
-
-  if (!auth.username && auth.username === '') {
-    result.error = Errors.ERROR_MISSING_USERNAME;
-
-    return result;
-  } else if (!auth.password && auth.password === '') {
-    result.error = Errors.ERROR_MISSING_PASSWORD;
-    return result;
-  }
-
-  result.valid = true;
-  return result;
 }

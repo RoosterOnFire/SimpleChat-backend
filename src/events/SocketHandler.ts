@@ -33,6 +33,6 @@ export async function SocketHandler(socket: ChatSocket) {
       await broadcastDisconnection(socket);
     });
   } catch (error) {
-    logError(error);
+    logError(error as Error);
   }
 }

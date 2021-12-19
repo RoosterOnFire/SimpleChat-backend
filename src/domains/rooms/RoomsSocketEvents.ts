@@ -11,10 +11,7 @@ export default function registerRoomsEvents(socket: ChatSocket) {
     async (payload: SocketRoomsPayload, callback: SocketCallback) => {
       socket.join(payload.roomName);
 
-      await RepositoryRoom.createRoom(payload.roomName);
-      if (socket.user) {
-        await RepositoryRoom.addUser(payload.roomName, socket.user.username);
-      }
+      await RepositoryRoom.create(payload.roomName);
 
       callback({
         success: true,

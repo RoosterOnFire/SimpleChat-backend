@@ -16,8 +16,9 @@ export async function MiddlewareRestoreSession(
     socket.user = user ?? undefined;
 
     return next();
-  } catch (error) {
-    logError(error);
+  } catch (error: unknown) {
+    logError(error as Error);
+
     return next();
   }
 }

@@ -19,7 +19,9 @@ server.register(fastifyIO, {
 server
   .ready()
   .then(() => {
-    UsersSeed();
+    if (process.env.seed === 'true') {
+      UsersSeed();
+    }
   })
   .then(() => {
     server.io.use(MiddlewareRestoreSession);

@@ -24,7 +24,7 @@ export function logDatabase(message: string, from?: string) {
   }
 }
 
-export function logError(error: any, from?: string) {
+export function logError(error: Error, from?: string) {
   const chalkFrom = from ? `[${chalk.red(from)}]` : '';
 
   log(`[${chalk.red('ERROR')}]${chalkFrom} ${error?.message}`);

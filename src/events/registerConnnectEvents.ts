@@ -5,10 +5,7 @@ import { ChatSocket, ChatSocketMessages } from '../types/TypeBase';
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
     ChatSocketMessages.CONNECT_REGISTRATION,
-    async (
-      payload: { username: string; password: string },
-      callback: Function
-    ) => {
+    async (payload: { username: string; password: string }, callback) => {
       try {
         const isExistingUser = await UserRepository.isUsernameUsed(
           payload.username
@@ -39,10 +36,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
 
   socket.on(
     ChatSocketMessages.CONNECT_SIGNIN,
-    async (
-      payload: { username: string; password: string },
-      callback: Function
-    ) => {
+    async (payload: { username: string; password: string }, callback) => {
       if (socket.user) {
         callback({
           success: true,
@@ -77,7 +71,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
     }
   );
 
-  socket.on(ChatSocketMessages.CONNECT_LOGOFF, async (callback: Function) => {
+  socket.on(ChatSocketMessages.CONNECT_LOGOFF, async (callback) => {
     try {
       if (socket.user) {
         await UserRepository.updateLogoff(socket.user);

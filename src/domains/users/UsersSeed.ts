@@ -27,6 +27,6 @@ export async function UsersSeed() {
       });
     }
   } catch (error) {
-    logError(error);
+    logError(error as Error);
   }
 }

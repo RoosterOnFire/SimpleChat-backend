@@ -49,10 +49,14 @@ async function updateSocket(user: User, socketId: string): Promise<boolean> {
   }
 }
 
-async function updateLogoff(user: User): Promise<boolean> {
+async function logout(socketId: string): Promise<boolean> {
   try {
+    const metaWithSocketId = await prisma.userMeta.findFirst({
+      where: { socketId },
+    });
+
     await prisma.userMeta.update({
-      where: { id: user.userMetaId },
+      where: { id: metaWithSocketId?.id },
       data: { socketId: '', sessionId: '' },
     });
 
@@ -78,7 +82,7 @@ async function updateSession(user: User, sessionId: string) {
 async function findWithSession(sessionId: string): Promise<ChatUser | null> {
   try {
     const userMeta = await prisma.userMeta.findFirst({
-      where: { sessionId },
+      where: { sessionId, NOT: { socketId: '' } },
       include: { User: true },
     });
 
@@ -116,7 +120,7 @@ const UserRepository = {
   getAll,
   isUsernameUsed,
   remove,
-  updateLogoff,
+  logout,
   updateSession,
   updateSocket,
 };

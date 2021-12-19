@@ -21,7 +21,7 @@ export enum ChatSocketMessages {
   CHAT_JOIN = 'chat:join',
   CHAT_MESSAGE = 'chat:message',
   CONNECT_ERROR = 'connect_error',
-  CONNECT_LOGOFF = 'connect:logoff',
+  CONNECT_LOGOUT = 'connect:logout',
   CONNECT_REGISTRATION = 'connect:registration',
   CONNECT_SIGNIN = 'connect:signin',
   ROOMS_CREATE = 'rooms:create',

@@ -6,7 +6,7 @@ export async function broadcastDisconnection(socket: ChatSocket) {
   if (socket.user?.username && socket.user?.userMetaId) {
     logInfo(`${socket.user.username} disconnected`);
 
-    await UserRespository.updateSession(socket.user, '');
+    await UserRespository.updateSocket(socket.user, '');
 
     socket.broadcast.emit('chat:leave', { ...socket.user });
   }

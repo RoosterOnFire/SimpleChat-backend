@@ -1,6 +1,8 @@
 import UserRepository from '../domains/users/UsersRepository';
 import { Errors, Roles } from '../types/TypeEnums';
 import { ChatSocket, ChatSocketMessages } from '../types/TypeBase';
+import { createRndId } from '../helpers/helpers';
+import { logError } from '../helpers/loggers';
 
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
@@ -37,7 +39,13 @@ export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
     ChatSocketMessages.CONNECT_SIGNIN,
     async (payload: { username: string; password: string }, callback) => {
+      if (payload.username === undefined || payload.password === undefined) {
+        callback({ success: false, error: Errors.ERROR_INVALID_SING_IN });
+        return;
+      }
+
       if (socket.user) {
+        UserRepository.updateSocket(socket.user, socket.id);
         callback({
           success: true,
           data: {
@@ -52,36 +60,34 @@ export default function registerConnnectEvents(socket: ChatSocket) {
         payload.username,
         payload.password
       );
-      console.log('user', user);
+
       if (user === null) {
         callback({ success: false, error: Errors.ERROR_INVALID_SING_IN });
         return;
-      } else {
-        await UserRepository.updateSocket(user, socket.id);
       }
+
+      const sessionId = createRndId();
+      await UserRepository.updateSocket(user, socket.id);
+      await UserRepository.updateSession(user, sessionId);
 
       callback({
         success: true,
         data: {
           role: Roles.ADMIN,
-          sessionId: user,
+          sessionId: sessionId,
           username: user.username,
         },
       });
     }
   );
 
-  socket.on(ChatSocketMessages.CONNECT_LOGOFF, async (callback) => {
+  socket.on(ChatSocketMessages.CONNECT_LOGOUT, async () => {
     try {
-      if (socket.user) {
-        await UserRepository.updateLogoff(socket.user);
+      await UserRepository.logout(socket.id);
 
-        callback({ status: true, message: 'User logged off succesfully' });
-
-        socket.disconnect();
-      }
+      socket.disconnect();
     } catch (error) {
-      callback({ status: false, error: 'ERROR' });
+      logError(error as Error);
     }
   });
 }

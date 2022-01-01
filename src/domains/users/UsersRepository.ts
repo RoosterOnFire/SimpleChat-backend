@@ -86,6 +86,8 @@ async function findWithSession(sessionId: string): Promise<ChatUser | null> {
       include: { User: true },
     });
 
+    console.log(sessionId, userMeta);
+
     if (userMeta && userMeta.User) {
       return await prisma.user.findUnique({
         where: { id: userMeta.User.id },

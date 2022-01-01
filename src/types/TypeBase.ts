@@ -4,7 +4,10 @@ import { ExtendedError } from 'socket.io/dist/namespace';
 
 export type ChatUser = User & { meta: UserMeta };
 
-export type ChatSocket = Socket & { user?: ChatUser };
+export type ChatSocket = Socket & {
+  user?: ChatUser;
+  sessionState?: 'new' | 'existings';
+};
 
 export type SocketMiddlewareNext = (err?: ExtendedError) => void;
 

@@ -10,15 +10,23 @@ export async function MiddlewareRestoreSession(
     const sessionId = socket.handshake.auth.sessionId;
 
     if (!sessionId) {
-      return next();
+      socket.sessionState = 'new';
+      next();
+      return;
     }
-    const user = await UserRepository.findWithSession(sessionId);
-    socket.user = user ?? undefined;
 
-    return next();
+    const user = await UserRepository.findWithSession(sessionId);
+    if (user) {
+      socket.user;
+      socket.sessionState = 'existings';
+    } else {
+      socket.user = undefined;
+      socket.sessionState = 'new';
+    }
+
+    next();
   } catch (error: unknown) {
     logError(error as Error);
-
-    return next();
+    next();
   }
 }

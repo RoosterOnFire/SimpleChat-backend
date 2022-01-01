@@ -39,12 +39,14 @@ export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
     ChatSocketMessages.CONNECT_SIGNIN,
     async (payload: { username: string; password: string }, callback) => {
-      if (payload.username === undefined || payload.password === undefined) {
-        callback({ success: false, error: Errors.ERROR_INVALID_SING_IN });
+      if (
+        socket.sessionState === 'new' &&
+        (payload.username === undefined || payload.password === undefined)
+      ) {
         return;
       }
 
-      if (socket.user) {
+      if (socket.sessionState === 'existings' && socket.user) {
         UserRepository.updateSocket(socket.user, socket.id);
         callback({
           success: true,
@@ -54,13 +56,14 @@ export default function registerConnnectEvents(socket: ChatSocket) {
             sessionId: socket.user.meta.sessionId,
           },
         });
+
+        return;
       }
 
       const user = await UserRepository.findWithNameAndPassword(
         payload.username,
         payload.password
       );
-
       if (user === null) {
         callback({ success: false, error: Errors.ERROR_INVALID_SING_IN });
         return;
@@ -69,7 +72,6 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       const sessionId = createRndId();
       await UserRepository.updateSocket(user, socket.id);
       await UserRepository.updateSession(user, sessionId);
-
       callback({
         success: true,
         data: {

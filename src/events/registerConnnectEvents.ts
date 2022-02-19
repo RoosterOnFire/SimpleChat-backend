@@ -1,9 +1,8 @@
 import UserRepository from "../domains/users/UsersRepository";
-import { Errors, Roles } from "../types/TypeEnums";
 import { ChatSocket } from "../types/TypeBase";
 import { createRndId } from "../helpers/helpers";
 import { logError } from "../helpers/loggers";
-import { ChatSocketMessages } from "simplechat-types";
+import { ChatSocketMessages, Errors, Roles } from "../types/TypeShared";
 
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(

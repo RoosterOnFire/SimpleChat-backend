@@ -4,7 +4,7 @@ import { broadcastDisconnection } from "../helpers/EventBroadcasters";
 import registerRoomsEvents from "../domains/rooms/RoomsSocketEvents";
 import registerUserEvents from "../domains/users/UsersSocketEvents";
 import registerConnnectEvents from "./registerConnnectEvents";
-import { ChatSocketMessages } from "simplechat-types";
+import { ChatSocketMessages } from "../types/TypeShared";
 
 export async function SocketHandler(socket: ChatSocket) {
   try {

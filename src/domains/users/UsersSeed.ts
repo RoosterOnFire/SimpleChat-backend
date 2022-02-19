@@ -1,6 +1,6 @@
 import { logDatabase, logError } from "../../helpers/loggers";
 import { prisma } from "../../database/ConnectionPrisma";
-import { Roles } from "../../types/TypeEnums";
+import { Roles } from "../../types/TypeShared";
 
 export async function UsersSeed() {
   try {

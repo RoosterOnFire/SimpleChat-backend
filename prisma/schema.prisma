@@ -11,7 +11,7 @@ model User {
   id         Int      @id @default(autoincrement())
   username   String   @unique
   password   String
-  role       Role     @default(USER)
+  role       Role     @default(user)
   meta       UserMeta @relation(fields: [userMetaId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())
@@ -31,6 +31,6 @@ model Room {
 }
 
 enum Role {
-  USER
-  ADMIN
+  user
+  admin
 }

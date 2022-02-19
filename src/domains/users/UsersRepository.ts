@@ -1,13 +1,13 @@
-import { ChatUser } from '../../types/TypeBase';
-import { prisma } from '../../database/ConnectionPrisma';
-import { User, UserMeta } from './UsersType';
+import { ChatUser } from "../../types/TypeBase";
+import { prisma } from "../../database/ConnectionPrisma";
+import { User, UserMeta } from "./UsersType";
 
 async function create(username: string, password: string, socketId: string) {
   return await prisma.user.create({
     data: {
       username,
       password,
-      meta: { create: { socketId, sessionId: '' } },
+      meta: { create: { socketId, sessionId: "" } },
     },
     include: { meta: true },
   });
@@ -40,7 +40,7 @@ async function updateSocket(user: User, socketId: string): Promise<boolean> {
     await prisma.userMeta.upsert({
       where: { id: user.userMetaId },
       update: { socketId },
-      create: { socketId, sessionId: '' },
+      create: { socketId, sessionId: "" },
     });
 
     return true;
@@ -57,7 +57,7 @@ async function logout(socketId: string): Promise<boolean> {
 
     await prisma.userMeta.update({
       where: { id: metaWithSocketId?.id },
-      data: { socketId: '', sessionId: '' },
+      data: { socketId: "", sessionId: "" },
     });
 
     return true;
@@ -82,7 +82,7 @@ async function updateSession(user: User, sessionId: string) {
 async function findWithSession(sessionId: string): Promise<ChatUser | null> {
   try {
     const userMeta = await prisma.userMeta.findFirst({
-      where: { sessionId, NOT: { socketId: '' } },
+      where: { sessionId, NOT: { socketId: "" } },
       include: { User: true },
     });
 

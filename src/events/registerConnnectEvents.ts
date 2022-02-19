@@ -1,19 +1,19 @@
-import UserRepository from '../domains/users/UsersRepository';
-import { Errors, Roles } from '../types/TypeEnums';
-import { ChatSocket, ChatSocketMessages } from '../types/TypeBase';
-import { createRndId } from '../helpers/helpers';
-import { logError } from '../helpers/loggers';
+import UserRepository from "../domains/users/UsersRepository";
+import { Errors, Roles } from "../types/TypeEnums";
+import { ChatSocket, ChatSocketMessages } from "../types/TypeBase";
+import { createRndId } from "../helpers/helpers";
+import { logError } from "../helpers/loggers";
 
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
-    ChatSocketMessages.CONNECT_REGISTRATION,
+    ChatSocketMessages.connect_registration,
     async (payload: { username: string; password: string }, callback) => {
       try {
         const isExistingUser = await UserRepository.isUsernameUsed(
           payload.username
         );
         if (isExistingUser) {
-          throw new Error(Errors.ERROR_USERNAME_IN_USE);
+          throw new Error(Errors.error_username_in_use);
         }
 
         const user = await UserRepository.create(
@@ -25,28 +25,28 @@ export default function registerConnnectEvents(socket: ChatSocket) {
         callback({
           success: true,
           data: {
-            role: Roles.ADMIN,
+            role: Roles.admin,
             sessionId: user.meta.sessionId,
             username: user.username,
           },
         });
       } catch (error) {
-        callback({ success: false, error: Errors.ERROR_NEW_USER_NOT_CREATED });
+        callback({ success: false, error: Errors.error_new_user_not_created });
       }
     }
   );
 
   socket.on(
-    ChatSocketMessages.CONNECT_SIGNIN,
+    ChatSocketMessages.connect_signin,
     async (payload: { username: string; password: string }, callback) => {
       if (
-        socket.sessionState === 'new' &&
+        socket.sessionState === "new" &&
         (payload.username === undefined || payload.password === undefined)
       ) {
         return;
       }
 
-      if (socket.sessionState === 'existings' && socket.user) {
+      if (socket.sessionState === "existings" && socket.user) {
         UserRepository.updateSocket(socket.user, socket.id);
         callback({
           success: true,
@@ -65,7 +65,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
         payload.password
       );
       if (user === null) {
-        callback({ success: false, error: Errors.ERROR_INVALID_SING_IN });
+        callback({ success: false, error: Errors.error_invalid_sing_in });
         return;
       }
 
@@ -75,7 +75,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       callback({
         success: true,
         data: {
-          role: Roles.ADMIN,
+          role: Roles.admin,
           sessionId: sessionId,
           username: user.username,
         },
@@ -83,7 +83,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
     }
   );
 
-  socket.on(ChatSocketMessages.CONNECT_LOGOUT, async () => {
+  socket.on(ChatSocketMessages.connect_logout, async () => {
     try {
       await UserRepository.logout(socket.id);
 

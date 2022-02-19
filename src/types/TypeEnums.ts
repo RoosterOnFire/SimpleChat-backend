@@ -1,16 +1,16 @@
 export enum Roles {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+  admin = "admin",
+  user = "user",
 }
 
 export enum Errors {
-  ERROR_INVALID_SING_IN = 'ERROR_INVALID_SING_IN',
-  ERROR_USERNAME_IN_USE = 'ERROR_USERNAME_IN_USE',
-  ERROR_NEW_USER_NOT_CREATED = 'ERROR_NEW_USER_NOT_CREATED',
+  error_invalid_sing_in = "error_invalid_sing_in",
+  error_username_in_use = "error_username_in_use",
+  error_new_user_not_created = "error_new_user_not_created",
 }
 
 export enum RealmSchemas {
-  USER = 'User',
-  USER_META = 'UserMeta',
-  ROOMS = 'Rooms',
+  user = "User",
+  user_meta = "UserMeta",
+  rooms = "Rooms",
 }

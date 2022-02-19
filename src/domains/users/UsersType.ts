@@ -1,1 +1,1 @@
-export { User, UserMeta } from '.prisma/client';
+export { User, UserMeta } from ".prisma/client";

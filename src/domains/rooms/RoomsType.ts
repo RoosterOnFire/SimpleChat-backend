@@ -1,1 +1,1 @@
-export { Room } from '.prisma/client';
+export { Room } from ".prisma/client";

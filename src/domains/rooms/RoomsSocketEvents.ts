@@ -1,13 +1,13 @@
-import RepositoryRoom from './RoomsRepository';
+import RepositoryRoom from "./RoomsRepository";
 import {
   ChatSocket,
   SocketCallback,
   SocketRoomsPayload,
-} from '../../types/TypeBase';
+} from "../../types/TypeBase";
 
 export default function registerRoomsEvents(socket: ChatSocket) {
   socket.on(
-    'rooms:join',
+    "rooms:join",
     async (payload: SocketRoomsPayload, callback: SocketCallback) => {
       socket.join(payload.roomName);
 
@@ -15,7 +15,7 @@ export default function registerRoomsEvents(socket: ChatSocket) {
 
       callback({
         success: true,
-        message: 'Joined room',
+        message: "Joined room",
         data: {
           name: payload.roomName,
         },
@@ -24,11 +24,11 @@ export default function registerRoomsEvents(socket: ChatSocket) {
   );
 
   socket.on(
-    'rooms:leave',
+    "rooms:leave",
     (payload: SocketRoomsPayload, callback: SocketCallback) => {
       socket.leave(payload.roomName);
 
-      callback({ success: true, message: 'Left room' });
+      callback({ success: true, message: "Left room" });
     }
   );
 }

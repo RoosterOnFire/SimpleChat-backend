@@ -16,6 +16,10 @@ export type SocketRoomsPayload = { roomName: string };
 export type SocketCallback = (payload: {
   success: boolean;
   message: string;
-  data?: any;
+  data?: any | SocketCallbackDataRoom;
   errors?: any[];
 }) => void;
+
+type SocketCallbackDataRoom = {
+  name: string;
+};

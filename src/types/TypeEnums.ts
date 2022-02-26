@@ -3,3 +3,8 @@ export enum RealmSchemas {
   user_meta = "UserMeta",
   rooms = "Rooms",
 }
+
+export enum SessionStates {
+  new = "new",
+  existings = "existings",
+}

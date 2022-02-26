@@ -1,6 +1,7 @@
 import { ChatSocket, SocketMiddlewareNext } from "../types/TypeBase";
 import { logError } from "../helpers/loggers";
 import UserRepository from "../domains/users/UsersRepository";
+import { SessionStates } from "../types/TypeEnums";
 
 export async function MiddlewareRestoreSession(
   socket: ChatSocket,
@@ -10,7 +11,7 @@ export async function MiddlewareRestoreSession(
     const sessionId = socket.handshake.auth.sessionId;
 
     if (!sessionId) {
-      socket.sessionState = "new";
+      socket.sessionState = SessionStates.new;
       next();
       return;
     }
@@ -18,10 +19,10 @@ export async function MiddlewareRestoreSession(
     const user = await UserRepository.findWithSession(sessionId);
     if (user) {
       socket.user;
-      socket.sessionState = "existings";
+      socket.sessionState = SessionStates.existings;
     } else {
       socket.user = undefined;
-      socket.sessionState = "new";
+      socket.sessionState = SessionStates.new;
     }
 
     next();

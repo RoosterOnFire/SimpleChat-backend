@@ -1,12 +1,13 @@
 import { User, UserMeta } from "../domains/users/UsersType";
 import { Socket } from "socket.io";
 import { ExtendedError } from "socket.io/dist/namespace";
+import { SessionStates } from "./TypeEnums";
 
 export type ChatUser = User & { meta: UserMeta };
 
 export type ChatSocket = Socket & {
   user?: ChatUser;
-  sessionState?: "new" | "existings";
+  sessionState?: SessionStates;
 };
 
 export type SocketMiddlewareNext = (err?: ExtendedError) => void;

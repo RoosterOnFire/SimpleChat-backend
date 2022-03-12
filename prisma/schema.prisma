@@ -19,10 +19,10 @@ model User {
 }
 
 model UserMeta {
-  id        Int    @id @default(autoincrement())
-  sessionId String @default("")
-  socketId  String @default("")
-  User      User?
+  id       Int    @id @default(autoincrement())
+  token    String @default("")
+  socketId String @default("")
+  User     User?
 }
 
 model Room {

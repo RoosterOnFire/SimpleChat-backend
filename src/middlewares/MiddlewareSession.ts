@@ -3,20 +3,20 @@ import { logError } from "../helpers/loggers";
 import UserRepository from "../domains/users/UsersRepository";
 import { SessionStates } from "../types/TypeEnums";
 
-export async function MiddlewareRestoreSession(
+export async function MiddlewareSession(
   socket: ChatSocket,
   next: SocketMiddlewareNext
 ) {
   try {
-    const sessionId = socket.handshake.auth.sessionId;
+    const token = socket.handshake.auth.token;
 
-    if (!sessionId) {
+    if (!token) {
       socket.sessionState = SessionStates.new;
       next();
       return;
     }
 
-    const user = await UserRepository.findWithSession(sessionId);
+    const user = await UserRepository.findWithSession(token);
     if (user) {
       socket.user;
       socket.sessionState = SessionStates.existings;

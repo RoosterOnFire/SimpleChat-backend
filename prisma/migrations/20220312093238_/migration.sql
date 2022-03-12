@@ -16,7 +16,7 @@ CREATE TABLE `User` (
 -- CreateTable
 CREATE TABLE `UserMeta` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `sessionId` VARCHAR(191) NOT NULL DEFAULT '',
+    `token` VARCHAR(191) NOT NULL DEFAULT '',
     `socketId` VARCHAR(191) NOT NULL DEFAULT '',
 
     PRIMARY KEY (`id`)

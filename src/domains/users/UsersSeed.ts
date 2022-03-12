@@ -13,7 +13,7 @@ export async function UsersSeed() {
           username: "admin",
           password: "admin",
           role: Roles.admin,
-          meta: { create: { sessionId: "", socketId: "" } },
+          meta: { create: { token: "", socketId: "" } },
         },
       });
 
@@ -22,7 +22,7 @@ export async function UsersSeed() {
           username: "user",
           password: "user",
           role: Roles.admin,
-          meta: { create: { sessionId: "", socketId: "" } },
+          meta: { create: { token: "", socketId: "" } },
         },
       });
     }

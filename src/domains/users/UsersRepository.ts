@@ -7,7 +7,7 @@ async function create(username: string, password: string, socketId: string) {
     data: {
       username,
       password,
-      meta: { create: { socketId, sessionId: "" } },
+      meta: { create: { socketId, token: "" } },
     },
     include: { meta: true },
   });
@@ -40,7 +40,7 @@ async function updateSocket(user: User, socketId: string): Promise<boolean> {
     await prisma.userMeta.upsert({
       where: { id: user.userMetaId },
       update: { socketId },
-      create: { socketId, sessionId: "" },
+      create: { socketId, token: "" },
     });
 
     return true;
@@ -57,7 +57,7 @@ async function logout(socketId: string): Promise<boolean> {
 
     await prisma.userMeta.update({
       where: { id: metaWithSocketId?.id },
-      data: { socketId: "", sessionId: "" },
+      data: { socketId: "", token: "" },
     });
 
     return true;
@@ -66,11 +66,11 @@ async function logout(socketId: string): Promise<boolean> {
   }
 }
 
-async function updateSession(user: User, sessionId: string) {
+async function updateSession(user: User, token: string) {
   try {
     await prisma.userMeta.update({
       where: { id: user.userMetaId },
-      data: { sessionId },
+      data: { token },
     });
 
     return true;
@@ -79,14 +79,14 @@ async function updateSession(user: User, sessionId: string) {
   }
 }
 
-async function findWithSession(sessionId: string): Promise<ChatUser | null> {
+async function findWithSession(token: string): Promise<ChatUser | null> {
   try {
     const userMeta = await prisma.userMeta.findFirst({
-      where: { sessionId, NOT: { socketId: "" } },
+      where: { token, NOT: { socketId: "" } },
       include: { User: true },
     });
 
-    console.log(sessionId, userMeta);
+    console.log(token, userMeta);
 
     if (userMeta && userMeta.User) {
       return await prisma.user.findUnique({

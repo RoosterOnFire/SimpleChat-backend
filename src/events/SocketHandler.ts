@@ -13,8 +13,8 @@ export async function SocketHandler(socket: ChatSocket) {
     });
 
     registerConnnectEvents(socket);
-    registerRoomsEvents(socket);
     registerUserEvents(socket);
+    registerRoomsEvents(socket);
 
     socket.on(
       ChatSocketMessages.chat_message,

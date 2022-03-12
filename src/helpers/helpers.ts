@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
 
-export function createRndId() {
+export function createToken() {
   return randomBytes(16).toString("hex");
 }

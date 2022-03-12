@@ -1,8 +1,9 @@
 import UserRepository from "../domains/users/UsersRepository";
 import { ChatSocket } from "../types/TypeBase";
-import { createRndId } from "../helpers/helpers";
+import { createToken } from "../helpers/helpers";
 import { logError } from "../helpers/loggers";
 import { ChatSocketMessages, Errors, Roles } from "../types/TypeShared";
+import { SessionStates } from "../types/TypeEnums";
 
 export default function registerConnnectEvents(socket: ChatSocket) {
   socket.on(
@@ -26,7 +27,7 @@ export default function registerConnnectEvents(socket: ChatSocket) {
           success: true,
           data: {
             role: Roles.admin,
-            sessionId: user.meta.sessionId,
+            token: user.meta.token,
             username: user.username,
           },
         });
@@ -40,20 +41,21 @@ export default function registerConnnectEvents(socket: ChatSocket) {
     ChatSocketMessages.connect_signin,
     async (payload: { username: string; password: string }, callback) => {
       if (
-        socket.sessionState === "new" &&
+        socket.sessionState === SessionStates.new &&
         (payload.username === undefined || payload.password === undefined)
       ) {
         return;
       }
 
-      if (socket.sessionState === "existings" && socket.user) {
+      if (socket.sessionState === SessionStates.existings && socket.user) {
         UserRepository.updateSocket(socket.user, socket.id);
+
         callback({
           success: true,
           data: {
             username: socket.user.username,
             role: socket.user.role,
-            sessionId: socket.user.meta.sessionId,
+            token: socket.user.meta.token,
           },
         });
 
@@ -66,17 +68,19 @@ export default function registerConnnectEvents(socket: ChatSocket) {
       );
       if (user === null) {
         callback({ success: false, error: Errors.error_invalid_sing_in });
+
         return;
       }
 
-      const sessionId = createRndId();
+      const token = createToken();
       await UserRepository.updateSocket(user, socket.id);
-      await UserRepository.updateSession(user, sessionId);
+      await UserRepository.updateSession(user, token);
+
       callback({
         success: true,
         data: {
-          role: Roles.admin,
-          sessionId: sessionId,
+          role: user.role,
+          token,
           username: user.username,
         },
       });

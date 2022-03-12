@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import fastify from "fastify";
 import fastifyHelmet from "fastify-helmet";
 import fastifyIO from "fastify-socket.io";
-import { MiddlewareRestoreSession } from "./middlewares/MiddlewareRestoreSession";
+import { MiddlewareSession } from "./middlewares/MiddlewareSession";
 import { SocketHandler } from "./events/SocketHandler";
 import { UsersSeed } from "./domains/users/UsersSeed";
 
@@ -24,7 +24,7 @@ server
     }
   })
   .then(() => {
-    server.io.use(MiddlewareRestoreSession);
+    server.io.use(MiddlewareSession);
     server.io.on("connection", SocketHandler);
   });
 

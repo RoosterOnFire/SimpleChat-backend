@@ -1,1 +1,1 @@
-# Simple Chat backend
+# SimpleChat backend
